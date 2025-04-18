@@ -8,6 +8,7 @@ from models import BiSeNet, get_deeplab_v2, FCDiscriminator
 from config import CITYSCAPES, GTA, DEEPLABV2_PATH, CITYSCAPES_PATH, GTA5_PATH
 from datasets import CityScapes, GTA5
 
+# Build model, optimizer and loss_fn
 def build_model(model_name: str, 
              n_classes: int,
              device: str,
