@@ -1,6 +1,3 @@
-import numpy as np
-import torch
-import torch.nn as nn
 from typing import Tuple, List, Union
 from models import BiSeNet, get_deeplab_v2
 from config import *
