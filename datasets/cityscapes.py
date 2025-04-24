@@ -19,14 +19,14 @@ class CityScapes(Dataset):
         """
         Args:
             root_dir (str): Root directory of Cityscapes dataset.
-            split (str): Dataset split, one of ['train', 'val', 'test'].
+            split (str): Dataset split, one of ['train', 'val'].
             transform (Optional[Compose]): Albumentations transform to apply.
         """
         super().__init__()
         self.transform = transform
         self.samples = []
 
-        img_dir = os.path.join(root_dir, "leftImg8bit", split)
+        img_dir = os.path.join(root_dir, "images", split)
         lbl_dir = os.path.join(root_dir, "gtFine", split)
 
         for city in os.listdir(img_dir):
