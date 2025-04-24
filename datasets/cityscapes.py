@@ -27,23 +27,23 @@ class CityScapes(Dataset):
         self.samples = []
 
         img_dir = os.path.join(root_dir, "images", split)
-        lbl_dir = os.path.join(root_dir, "gtFine", split)
+        label_dir = os.path.join(root_dir, "gtFine", split)
 
         for city in os.listdir(img_dir):
             img_city_path = os.path.join(img_dir, city)
-            lbl_city_path = os.path.join(lbl_dir, city)
+            label_city_path = os.path.join(label_dir, city)
             for fname in os.listdir(img_city_path):
                 if fname.endswith("_leftImg8bit.png"):
                     img_path = os.path.join(img_city_path, fname)
-                    lbl_name = fname.replace("_leftImg8bit", "_gtFine_labelTrainIds")
-                    lbl_path = os.path.join(lbl_city_path, lbl_name)
-                    self.samples.append((img_path, lbl_path))
+                    label_name = fname.replace("_leftImg8bit", "_gtFine_labelTrainIds")
+                    label_path = os.path.join(label_city_path, label_name)
+                    self.samples.append((img_path, label_path))
 
     def __len__(self) -> int:
         return len(self.samples)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        img_path, lbl_path = self.samples[idx]
+        img_path, label_path = self.samples[idx]
 
         image = np.array(Image.open(img_path).convert("RGB"))
         label = np.array(Image.open(lbl_path).convert("L"))  # grayscale for labels
