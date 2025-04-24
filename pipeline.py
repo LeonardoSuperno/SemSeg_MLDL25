@@ -99,7 +99,6 @@ def pipeline (model_name: str,
                           power=power,
                           adversarial=adversarial)
 
-    ###### evaluation -> in utils in computations
     # Evaluation on validation set
     eval_metrics = evaluate_model(model=model,
                                   dataloader=val_loader,
