@@ -99,7 +99,19 @@ def pipeline (model_name: str,
                           power=power,
                           adversarial=adversarial)
 
-    # evaluation -> in utils in computations
+    ###### evaluation -> in utils in computations
+    # Evaluation on validation set
+    eval_metrics = evaluate_model(model=model,
+                                  dataloader=val_loader,
+                                  device=device,
+                                  n_classes=n_classes,
+                                  ignore_index=ignore_index)
+    
+    if verbose:
+        print("\nEvaluation Results:")
+        for k, v in eval_metrics.items():
+            print(f"{k}: {v}")
+
     model_params_flops = compute_flops(model=model, 
                                        height=data_height, 
                                        width=data_width)
