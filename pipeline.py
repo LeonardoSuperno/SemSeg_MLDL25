@@ -2,8 +2,11 @@ from typing import Tuple, List, Union
 from models import BiSeNet, get_deeplab_v2
 from config import *
 from builder import *
-from train import train
+from train_val import train_val
 from evaluation import evaluate_model
+from utils.metrics import *
+from utils.optimization import *
+from utils.visualization import *
 
 
 def pipeline (model_name: str, 
@@ -82,7 +85,7 @@ def pipeline (model_name: str,
                                                                     n_workers,
                                                                     adversarial)
     
-    model_results = train(model=model,
+    model_results = train_val(model=model,
                           model_D = model_D,
                           optimizer=optimizer, 
                           optimizer_D = optimizer_D,
@@ -99,17 +102,17 @@ def pipeline (model_name: str,
                           power=power,
                           adversarial=adversarial)
 
-    # Evaluation on validation set
-    eval_metrics = evaluate_model(model=model,
-                                  dataloader=val_loader,
-                                  device=device,
-                                  n_classes=n_classes,
-                                  ignore_index=ignore_index)
+    # # Evaluation on validation set
+    # eval_metrics = evaluate_model(model=model,
+    #                               dataloader=val_loader,
+    #                               device=device,
+    #                               n_classes=n_classes,
+    #                               ignore_index=ignore_index)
     
-    if verbose:
-        print("\nEvaluation Results:")
-        for k, v in eval_metrics.items():
-            print(f"{k}: {v}")
+    # if verbose:
+    #     print("\nEvaluation Results:")
+    #     for k, v in eval_metrics.items():
+    #         print(f"{k}: {v}")
 
     model_params_flops = compute_flops(model=model, 
                                        height=data_height, 
@@ -140,9 +143,9 @@ def pipeline (model_name: str,
              train_dataset_name, 
              val_dataset_name)
     
-    # save results -> in utlis in checkpoint
-    save_results(model_results, 
-                 filename=f"{model_name}_metrics_{project_step}", 
-                 project_step=project_step,
-                 model_params_flops=model_params_flops,
-                 model_latency_fps=model_latency_fps)
+    # # save results -> in utlis in checkpoint
+    # save_results(model_results, 
+    #              filename=f"{model_name}_metrics_{project_step}", 
+    #              project_step=project_step,
+    #              model_params_flops=model_params_flops,
+    #              model_latency_fps=model_latency_fps)

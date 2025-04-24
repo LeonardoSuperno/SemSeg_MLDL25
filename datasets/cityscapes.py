@@ -46,14 +46,14 @@ class CityScapes(Dataset):
         img_path, label_path = self.samples[idx]
 
         image = np.array(Image.open(img_path).convert("RGB"))
-        label = np.array(Image.open(lbl_path).convert("L"))  # grayscale for labels
+        label = np.array(Image.open(label_path).convert("L"))  # grayscale for labels
 
         if self.transform:
             transformed = self.transform(image=image, mask=label)
             image = transformed["image"]
             label = transformed["mask"]
 
-        image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0
+        image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0 # from H, W, C to C, H, W for PtTorch Standard
         label = torch.from_numpy(label).long()
 
         return image, label

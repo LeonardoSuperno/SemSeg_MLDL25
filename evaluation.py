@@ -49,3 +49,5 @@ def evaluate_model(model: torch.nn.Module,
     results["accuracy"] = round(acc, 4)
 
     return results
+
+

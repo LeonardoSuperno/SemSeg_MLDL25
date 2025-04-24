@@ -1,0 +1,8 @@
+numpy
+matplotlib
+seaborn
+pillow
+torch
+torchvision
+albumentations
+fvcore

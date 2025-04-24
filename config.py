@@ -1,5 +1,5 @@
 # Core
-EPOCHS = 50
+EPOCHS = 3
 DEVICE = 'cuda'
 PARALLELIZE = True
 PROJECT_STEP = 'Step2_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
