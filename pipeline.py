@@ -3,6 +3,8 @@ from models import BiSeNet, get_deeplab_v2
 from config import *
 from builder import *
 from train import train
+from evaluation import evaluate_model
+
 
 def pipeline (model_name: str, 
               train_dataset_name: str, 
