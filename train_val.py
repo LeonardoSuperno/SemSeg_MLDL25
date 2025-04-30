@@ -74,10 +74,7 @@ Returns:
         model.train()
         
         
-        #for image, label in train_loader:
-        for i, (image, label) in enumerate(train_loader):  # SOLO PER DEBUG ELIMINARE
-            if i >= 5:
-                break
+        for image, label in train_loader:
             image, label = image.to(device), label.type(torch.LongTensor).to(device)
         
             output = model(image)
@@ -109,10 +106,7 @@ Returns:
         model.eval()
 
         with torch.inference_mode(): # which is analogous to torch.no_grad
-            # for image, label in val_loader:
-            for i, (image, label) in enumerate(val_loader):  # SOLO PER DEBUG ELIMINARE
-                if i >= 5:
-                    break
+            for image, label in val_loader:        
                 image, label = image.to(device), label.type(torch.LongTensor).to(device)
                 
                 output = model(image)
