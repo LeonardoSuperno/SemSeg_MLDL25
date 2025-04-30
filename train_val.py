@@ -3,11 +3,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-from models import BiSeNet, get_deeplab_v2
+#from models import BiSeNet, get_deeplab_v2
 from typing import Tuple, List, Union
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *
+from utils.checkpoints import *
 
 def train_val(model: torch.nn.Module, 
           model_D: torch.nn.Module, 
@@ -19,6 +20,7 @@ def train_val(model: torch.nn.Module,
           val_loader: DataLoader, 
           epochs: int, 
           device: str, 
+          output_root: str,
           checkpoint_root: str,
           project_step: str,
           verbose: bool,
@@ -54,12 +56,15 @@ Returns:
         - train_iou (List[float]): List of per-class IoU for training per epoch.
         - val_iou (List[float]): List of per-class IoU for validation per epoch.
     """
-    # Initialization of the metrics lists
-    train_loss_list, train_miou_list = [], []
-    val_loss_list, val_miou_list = [], []
-    start_epoch = 0
+    # Load or initialize checkpoint
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, project_step=project_step, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
+        
+    if no_checkpoint:
+        train_loss_list, train_miou_list = [], []
+        val_loss_list, val_miou_list = [], []
+        start_epoch = 0
 
-    for epoch in range(epochs):
+    for epoch in range(start_epoch, epochs):
 
         # Train
         total_loss = 0
@@ -68,7 +73,11 @@ Returns:
         
         model.train()
         
-        for image, label in train_loader:
+        
+        #for image, label in train_loader:
+        for i, (image, label) in enumerate(train_loader):  # SOLO PER DEBUG ELIMINARE
+            if i >= 5:
+                break
             image, label = image.to(device), label.type(torch.LongTensor).to(device)
         
             output = model(image)
@@ -100,7 +109,10 @@ Returns:
         model.eval()
 
         with torch.inference_mode(): # which is analogous to torch.no_grad
-            for image, label in val_loader:
+            # for image, label in val_loader:
+            for i, (image, label) in enumerate(val_loader):  # SOLO PER DEBUG ELIMINARE
+                if i >= 5:
+                    break
                 image, label = image.to(device), label.type(torch.LongTensor).to(device)
                 
                 output = model(image)
@@ -125,7 +137,6 @@ Returns:
         val_miou_list.append(val_miou)
 
         # Print statistics if verbose 
-        #TODO
         print_stats(epoch=epoch, 
                     train_loss=train_loss,
                     val_loss=val_loss, 
@@ -139,8 +150,23 @@ Returns:
                           iter=epoch, 
                           max_iter=epochs,
                           power=power)
+        
         # Save checkpoint after each epoch
-        # TODO maybe
+        save_checkpoint(output_root=output_root, 
+                        project_step=project_step,
+                        adversarial=adversarial,
+                        model=model, 
+                        model_D=model_D,
+                        optimizer=optimizer, 
+                        optimizer_D=optimizer_D, 
+                        epoch=epoch,
+                        train_loss_list=train_loss_list, 
+                        train_miou_list=train_miou_list,
+                        train_iou=train_iou,
+                        val_loss_list=val_loss_list,
+                        val_miou_list=val_miou_list,
+                        val_iou=val_iou,
+                        verbose=verbose)
 
 
     return train_loss_list, val_loss_list, train_miou_list, val_miou_list, train_iou, val_iou

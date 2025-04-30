@@ -1,5 +1,5 @@
 from typing import Tuple, List, Union
-from models import BiSeNet, get_deeplab_v2
+#from models import BiSeNet, get_deeplab_v2
 from config import *
 from builder import *
 from train_val import train_val
@@ -7,6 +7,7 @@ from evaluation import evaluate_model
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *
+from utils.checkpoints import *
 
 
 def pipeline (model_name: str, 
@@ -28,11 +29,14 @@ def pipeline (model_name: str,
               parallelize:bool,
               project_step:str,
               verbose: bool,
+              output_root:str,
               checkpoint_root:str,
               power:float,
               evalIterations:int,
               adversarial:bool
               )->None:
+    
+    print("Sono nella pipeline")
     """
     Main pipeline function to orchestrate the training and evaluation of a deep learning model.
 
@@ -95,6 +99,7 @@ def pipeline (model_name: str,
                           val_loader=val_loader, 
                           epochs=epochs, 
                           device=device, 
+                          output_root=output_root,
                           checkpoint_root=checkpoint_root,
                           project_step=project_step,
                           verbose=verbose,
@@ -124,7 +129,7 @@ def pipeline (model_name: str,
                                                 iterations=evalIterations, 
                                                 device=device)
     
-    # visualization -> in utils in visualization
+    # visualization 
     plot_loss(model_results, 
               model_name, 
               project_step, 
@@ -143,9 +148,9 @@ def pipeline (model_name: str,
              train_dataset_name, 
              val_dataset_name)
     
-    # # save results -> in utlis in checkpoint
-    # save_results(model_results, 
-    #              filename=f"{model_name}_metrics_{project_step}", 
-    #              project_step=project_step,
-    #              model_params_flops=model_params_flops,
-    #              model_latency_fps=model_latency_fps)
+    # save results
+    save_results(model_results, 
+                 filename=f"{model_name}_metrics_{project_step}", 
+                 project_step=project_step,
+                 model_params_flops=model_params_flops,
+                 model_latency_fps=model_latency_fps)

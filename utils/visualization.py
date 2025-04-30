@@ -5,10 +5,11 @@ import os
 import random
 from collections import OrderedDict
 from typing import Tuple
-from utils import get_id_to_label, label_to_rgb
-from datasets import CityScapes
-from models import get_deeplab_v2, BiSeNet
-from config import CHECKPOINT_ROOT, CITYSCAPES_PATH, DEEPLABV2_PATH
+from utils.data_processing import get_id_to_label, label_to_rgb
+from datasets.cityscapes import CityScapes
+from models.deeplabv2.deeplabv2 import get_deeplab_v2
+from models.bisenet.build_bisenet import BiSeNet
+from config import OUTPUT_ROOT, CITYSCAPES_PATH, DEEPLABV2_PATH
 
 def print_stats(epoch:int, 
                 train_loss:float,
@@ -73,7 +74,7 @@ def plot_loss(model_results:list,
     plt.show()
     
     # Save the plot
-    checkpoint_path = f'{CHECKPOINT_ROOT}/{project_step}'
+    checkpoint_path = f'{OUTPUT_ROOT}/{project_step}'
     if os.path.exists(checkpoint_path):
         fig.savefig(f"{checkpoint_path}/{model_name}_{project_step}_loss.png", format='png')
     else:
@@ -117,7 +118,7 @@ def plot_miou(model_results:list,
     plt.show()
 
     # Save the plot
-    checkpoint_path = f'{CHECKPOINT_ROOT}/{project_step}'
+    checkpoint_path = f'{OUTPUT_ROOT}/{project_step}'
     if os.path.exists(checkpoint_path):
         fig.savefig(f"{checkpoint_path}/{model_name}_{project_step}_miou.png", format='png')
     else:
@@ -168,7 +169,7 @@ def plot_iou(model_results:list,
     plt.tight_layout()
     plt.show()
 
-    checkpoint_path = f'{CHECKPOINT_ROOT}/{project_step}'
+    checkpoint_path = f'{OUTPUT_ROOT}/{project_step}'
     if os.path.exists(checkpoint_path):
         fig.savefig(f"{checkpoint_path}/{model_name}_{project_step}_iou.png", format='png')
     else:

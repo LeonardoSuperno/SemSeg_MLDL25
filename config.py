@@ -1,5 +1,5 @@
 # Core
-EPOCHS = 3
+EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
 PROJECT_STEP = 'Step2_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
@@ -25,7 +25,7 @@ TRAIN_DATASET_NAME = 'CityScapes'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = False
 AUGMENTED_TYPE = 'transform4'  # [transform1, transform2, transform3, transform4]
-BATCH_SIZE = 2  # [2, 4, 8]
+BATCH_SIZE = 4  # [2, 4, 8]
 N_WORKERS = 0 # [0, 2, 4]
 CITYSCAPES = {
     'width': 1024,
@@ -37,7 +37,8 @@ GTA = {
 }
 
 # Paths
-CITYSCAPES_PATH = 'data/Cityscapes'
+CITYSCAPES_PATH = '/kaggle/input/cityscapes/Cityscapes/Cityspaces'
 GTA5_PATH = 'data/GTA5_with_mask'
-DEEPLABV2_PATH = 'models/Deeplab_resnet_pretrained_imagenet.pth'
-CHECKPOINT_ROOT = 'checkpoints'
+DEEPLABV2_PATH = '/kaggle/input/deeplab-resnet-pretrained-imagenet/deeplab_resnet_pretrained_imagenet.pth'
+OUTPUT_ROOT = '/kaggle/working/'
+CHECKPOINT_ROOT = None #['/kaggle/input/checkpoint/checkpoint', None]

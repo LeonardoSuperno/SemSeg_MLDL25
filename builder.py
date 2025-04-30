@@ -4,9 +4,12 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Tuple, Union
 import albumentations as A
-from models import BiSeNet, get_deeplab_v2, FCDiscriminator
+#from models import BiSeNet, get_deeplab_v2, FCDiscriminator
+from models.bisenet.build_bisenet import BiSeNet
+from models.deeplabv2.deeplabv2 import get_deeplab_v2
 from config import CITYSCAPES, GTA, DEEPLABV2_PATH, CITYSCAPES_PATH, GTA5_PATH
-from datasets import CityScapes, GTA5
+from datasets.cityscapes import CityScapes
+from datasets.gta5 import GTA5
 
 # Build model, optimizer and loss_fn
 def build_model(model_name: str, 
@@ -84,7 +87,7 @@ def build_model(model_name: str,
     
     # Initialize adversarial components if adversarial is True
     if adversarial:
-        model_D = FCDiscriminator(num_classes=n_classes).to(device)
+        #model_D = FCDiscriminator(num_classes=n_classes).to(device)
         if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
             model_D = torch.nn.DataParallel(model_D).to(device)
         optimizer_D = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
