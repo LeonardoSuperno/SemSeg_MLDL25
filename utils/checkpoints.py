@@ -216,7 +216,7 @@ def load_checkpoint(checkpoint_root: str,
     
     else:
         
-        print(f"No checkpoint found in {directory}. Starting from scratch.")
+        print(f"No checkpoint found. Starting from scratch.")
         
         # Return the state indicating that training should start from scratch
         return (True, None, None, None, None, None, None, None)
