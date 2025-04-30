@@ -8,7 +8,7 @@ EVAL_ITERATIONS = 100
 ADVERSARIAL = False
 
 # Model
-MODEL_NAME = 'deeplabv2'  # [deeplabv2, bisenet]
+MODEL_NAME = 'DeepLabV2'  # [DeepLabV2, BiSeNet]
 
 # Optimizer
 OPTIMIZER_NAME = 'Adam'  # [SGD, Adam]
@@ -21,8 +21,8 @@ IGNORE_INDEX = 255
 
 # Datasets
 N_CLASSES = 19
-TRAIN_DATASET_NAME = 'Cityscapes'  # [Cityscapes, GTA5]
-VAL_DATASET_NAME = 'Cityscapes'  # [Cityscapes]
+TRAIN_DATASET_NAME = 'CityScapes'  # [CityScapes, GTA5]
+VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = False
 AUGMENTED_TYPE = 'transform4'  # [transform1, transform2, transform3, transform4]
 BATCH_SIZE = 4  # [2, 4, 8]
