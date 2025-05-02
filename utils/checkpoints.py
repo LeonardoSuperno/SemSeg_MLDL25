@@ -114,7 +114,7 @@ def save_checkpoint(output_root: str,
         None
     """
     # Construct the path for the checkpoint file
-    checkpoint_path = f'{output_root}/checkpoint.pth'
+    checkpoint_path = f'{output_root}/checkpoint{epoch}.pth'
 
     
     

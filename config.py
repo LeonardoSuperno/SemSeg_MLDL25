@@ -25,8 +25,8 @@ TRAIN_DATASET_NAME = 'CityScapes'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = False
 AUGMENTED_TYPE = 'transform4'  # [transform1, transform2, transform3, transform4]
-BATCH_SIZE = 4  # [2, 4, 8]
-N_WORKERS = 0 # [0, 2, 4]
+BATCH_SIZE = 6  # [2, 4, 8]
+N_WORKERS = 6 # [0, 2, 4]
 CITYSCAPES = {
     'width': 1024,
     'height': 512

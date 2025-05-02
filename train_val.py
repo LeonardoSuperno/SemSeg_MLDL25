@@ -141,7 +141,8 @@ Returns:
         # Adjust learning rate
         poly_lr_scheduler(optimizer=optimizer,
                           init_lr=optimizer.param_groups[0]['lr'],
-                          iter=epoch, 
+                          iter=epoch,
+                          lr_decay_iter=1, 
                           max_iter=epochs,
                           power=power)
         

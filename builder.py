@@ -144,23 +144,23 @@ def build_loaders(train_dataset_name: str,
         source_dataset = GTA5(root_dir=GTA5_PATH, transform=transform_gta5)
         target_dataset = CityScapes(root_dir=CITYSCAPES_PATH, split='train', transform=transform_cityscapes)
 
-        source_loader = DataLoader(source_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
-        target_loader = DataLoader(target_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+        source_loader = DataLoader(source_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, pin_memory=True)
+        target_loader = DataLoader(target_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, pin_memory=True)
 
         train_loader = (source_loader, target_loader)
     else:
         if train_dataset_name == 'CityScapes':
             train_dataset = CityScapes(root_dir=CITYSCAPES_PATH, split='train', transform=transform_cityscapes)
-            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, pin_memory=True)
         elif train_dataset_name == 'GTA5':
             train_dataset = GTA5(root_dir=GTA5_PATH, transform=transform_gta5)
-            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers)
+            train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=n_workers, pin_memory=True)
         else:
             raise ValueError('Train datasets accepted: [CityScapes, GTA5]')
         
     if val_dataset_name == 'CityScapes':
         val_dataset = CityScapes(root_dir=CITYSCAPES_PATH, split='val', transform=transform_cityscapes)
-        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers, pin_memory=True)
         data_height = CITYSCAPES['height']
         data_width = CITYSCAPES['width']
     else:

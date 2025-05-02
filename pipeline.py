@@ -36,7 +36,6 @@ def pipeline (model_name: str,
               adversarial:bool
               )->None:
     
-    print("Sono nella pipeline")
     """
     Main pipeline function to orchestrate the training and evaluation of a deep learning model.
 
