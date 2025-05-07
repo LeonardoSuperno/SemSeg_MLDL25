@@ -187,7 +187,7 @@ def load_checkpoint(checkpoint_root: str,
     if checkpoint_root != None:
 
         # Construct the path to the checkpoint file
-        checkpoint_path = f'{checkpoint_root}/{project_step}/checkpoint.pth'
+        checkpoint_path = f'{checkpoint_root}/checkpoint.pth'
 
         # Load the checkpoint
         checkpoint = torch.load(checkpoint_path)

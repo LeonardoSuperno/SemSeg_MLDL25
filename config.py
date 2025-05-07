@@ -1,14 +1,14 @@
 # Core
-EPOCHS = 50
+EPOCHS = 5
 DEVICE = 'cuda'
 PARALLELIZE = True
-PROJECT_STEP = 'Step2_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
+PROJECT_STEP = 'Step3_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
 VERBOSE = True
 EVAL_ITERATIONS = 100
 ADVERSARIAL = False
 
 # Model
-MODEL_NAME = 'DeepLabV2'  # [DeepLabV2, BiSeNet]
+MODEL_NAME = 'BiSeNet'  # [DeepLabV2, BiSeNet]
 
 # Optimizer
 OPTIMIZER_NAME = 'Adam'  # [SGD, Adam]
@@ -21,10 +21,10 @@ IGNORE_INDEX = 255
 
 # Datasets
 N_CLASSES = 19
-TRAIN_DATASET_NAME = 'CityScapes'  # [CityScapes, GTA5]
+TRAIN_DATASET_NAME = 'GTA5'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = False
-AUGMENTED_TYPE = 'transform4'  # [transform1, transform2, transform3, transform4]
+AUGMENTED_TYPE = 'aug1'  # ['aug1', 'aug2', 'aug3', 'aug4']
 BATCH_SIZE = 6  # [2, 4, 8]
 N_WORKERS = 6 # [0, 2, 4]
 CITYSCAPES = {

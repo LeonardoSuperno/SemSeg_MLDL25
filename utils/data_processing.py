@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import PIL
-from config import GTA
+from config import GTA, CITYSCAPES
 import albumentations as A
 
 def get_color_to_id() -> dict:
@@ -97,3 +97,34 @@ def label_to_rgb(label:np.ndarray)->PIL.Image:
     color_image[label == 255] = (0, 0, 0)
     
     return Image.fromarray(color_image, 'RGB')
+
+def get_augmented_data(augmentedType: str) -> A.Compose:
+    
+    augmentations = {
+        'aug1': A.Compose([
+            A.HorizontalFlip(p=0.5)
+        ]),
+        'aug2': A.Compose([
+            A.HorizontalFlip(p=0.5),
+            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5)
+        ]),
+        'aug3': A.Compose([
+            A.HorizontalFlip(p=0.5),
+            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5),
+            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6))
+            
+        ]),
+        'aug4': A.Compose([
+            A.HorizontalFlip(p=0.5),
+            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5),
+            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
+            A.ShiftScaleRotate(scale_limit=(0.1, 0.3), shift_limit=0.0, rotate_limit=0, p=0.5)
+        ]),
+    }
+    
+    # Return the specified augmentation pipeline if it exists
+    if augmentedType in ['aug1', 'aug2', 'aug3', 'aug4']:
+        return augmentations[augmentedType]
+    else:
+        print('Transformation accepted: [flip, flip+jitter, flip+blur, flip+noise]')
+        

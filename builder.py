@@ -4,6 +4,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Tuple, Union
 import albumentations as A
+from utils.data_processing import get_augmented_data
 #from models import BiSeNet, get_deeplab_v2, FCDiscriminator
 from models.bisenet.build_bisenet import BiSeNet
 from models.deeplabv2.deeplabv2 import get_deeplab_v2
@@ -129,7 +130,7 @@ def build_loaders(train_dataset_name: str,
         A.Resize(CITYSCAPES['height'], CITYSCAPES['width']),
     ])
     transform_gta5 = A.Compose([
-        A.Resize(GTA['height'], GTA['width'])
+        A.Resize(GTA['height'], GTA['width'])   
     ])
 
     train_loader = None
@@ -137,8 +138,8 @@ def build_loaders(train_dataset_name: str,
     data_height = None
     data_width = None
     
-    # if augmented:
-    #     transform_gta5 = get_augmented_data(augmentedType)
+    if augmented:
+        transform_gta5 = get_augmented_data(augmentedType)
     
     if adversarial:
         source_dataset = GTA5(root_dir=GTA5_PATH, transform=transform_gta5)
