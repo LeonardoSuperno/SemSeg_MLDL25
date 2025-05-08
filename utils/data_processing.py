@@ -3,6 +3,7 @@ from PIL import Image
 import PIL
 from config import GTA, CITYSCAPES
 import albumentations as A
+import cv2
 
 def get_color_to_id() -> dict:
     """
@@ -118,7 +119,7 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
             A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
             A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
             A.RandomResizedCrop(size=(512,1024), ratio=(2,2)),
-            A.Rotate(limit=(-10,10))
+            A.Rotate(limit=(-10,10), border_mode=cv2.BORDER_CONSTANT, value=0, mask_value=255)
         ]),
     }
     
