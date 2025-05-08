@@ -6,3 +6,4 @@ torch
 torchvision
 albumentations
 fvcore
+cv2

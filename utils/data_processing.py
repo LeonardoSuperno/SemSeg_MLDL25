@@ -3,6 +3,7 @@ from PIL import Image
 import PIL
 from config import GTA, CITYSCAPES
 import albumentations as A
+import cv2
 
 def get_color_to_id() -> dict:
     """
