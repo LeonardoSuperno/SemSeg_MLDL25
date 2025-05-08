@@ -35,7 +35,7 @@ class CityScapes(Dataset):
             for fname in os.listdir(img_city_path):
                 if fname.endswith("_leftImg8bit.png"):
                     img_path = os.path.join(img_city_path, fname)
-                    label_name = fname.replace("_leftImg8bit", "_gtFine_labelTrainIds")
+                    label_name = fname.replace("_leftImg8bit", "_gtFine_labelTrainIds") # imageLabel pixel=[0-18]+255
                     label_path = os.path.join(label_city_path, label_name)
                     self.samples.append((img_path, label_path))
 
@@ -53,7 +53,7 @@ class CityScapes(Dataset):
             image = transformed["image"]
             label = transformed["mask"]
 
-        image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0 # from H, W, C to C, H, W for PtTorch Standard
+        image = torch.from_numpy(image).permute(2, 0, 1).float() / 255.0 # from H, W, C to C, H, W for PyTorch Standard
         label = torch.from_numpy(label).long()
 
         return image, label

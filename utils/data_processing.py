@@ -106,19 +106,19 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
         ]),
         'aug2': A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5)
+            A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5)
         ]),
         'aug3': A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5),
-            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6))
-            
+            A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
+            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6))            
         ]),
         'aug4': A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=(0.8, 1), contrast=(0.7, 1), saturation=(0.8, 1.0), hue=0, p=0.5),
+            A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
             A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
-            A.ShiftScaleRotate(scale_limit=(0.1, 0.3), shift_limit=0.0, rotate_limit=0, p=0.5)
+            A.RandomResizedCrop(size=(512,1024), ratio=(2,2)),
+            A.Rotate(limit=(-10,10))
         ]),
     }
     
@@ -126,5 +126,5 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
     if augmentedType in ['aug1', 'aug2', 'aug3', 'aug4']:
         return augmentations[augmentedType]
     else:
-        print('Transformation accepted: [flip, flip+jitter, flip+blur, flip+noise]')
+        print('Transformation accepted: [aug1, aug2, aug3, aug4]')
         
