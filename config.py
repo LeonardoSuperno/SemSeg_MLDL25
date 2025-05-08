@@ -2,7 +2,7 @@
 EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
-PROJECT_STEP = 'Step3_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
+PROJECT_STEP = 'Step3_2'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
 VERBOSE = True
 EVAL_ITERATIONS = 100
 ADVERSARIAL = False
@@ -24,7 +24,7 @@ N_CLASSES = 19
 TRAIN_DATASET_NAME = 'GTA5'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = True
-AUGMENTED_TYPE = 'aug4'  # ['aug1', 'aug2', 'aug3', 'aug4']
+AUGMENTED_TYPE = 'aug2'  # ['aug1', 'aug2', 'aug3', 'aug4']
 BATCH_SIZE = 6  # [2, 4, 8]
 N_WORKERS = 6 # [0, 2, 4]
 CITYSCAPES = {
