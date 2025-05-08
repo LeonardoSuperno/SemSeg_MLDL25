@@ -2,7 +2,7 @@
 EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
-PROJECT_STEP = 'Step3_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
+PROJECT_STEP = 'Step3_2'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
 VERBOSE = True
 EVAL_ITERATIONS = 100
 ADVERSARIAL = False
