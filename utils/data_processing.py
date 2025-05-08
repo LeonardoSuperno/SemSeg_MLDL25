@@ -102,23 +102,27 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
     
     augmentations = {
         'aug1': A.Compose([
-            A.HorizontalFlip(p=0.5)
+            A.HorizontalFlip(p=0.5),
+            A.Resize(GTA['height'], GTA['width'])  
         ]),
         'aug2': A.Compose([
             A.HorizontalFlip(p=0.5),
-            A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5)
+            A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
+            A.Resize(GTA['height'], GTA['width'])  
         ]),
         'aug3': A.Compose([
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
-            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6))            
+            A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
+            A.Resize(GTA['height'], GTA['width'])              
         ]),
         'aug4': A.Compose([
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
             A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
             A.RandomResizedCrop(size=(512,1024), ratio=(2,2)),
-            A.Rotate(limit=(-10,10))
+            A.Rotate(limit=(-10,10)),
+            A.Resize(GTA['height'], GTA['width'])  
         ]),
     }
     

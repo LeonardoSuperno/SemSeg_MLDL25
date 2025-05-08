@@ -58,8 +58,9 @@ class GTA5(Dataset):
         img_path, lbl_path = self.samples[idx]
 
         image = np.array(Image.open(img_path).convert("RGB"))
-        label_rgb = np.array(Image.open(lbl_path).convert("RGB"))
-        label = self.convert_rgb_to_grey_scale(label_rgb)
+        # label_rgb = np.array(Image.open(lbl_path).convert("RGB"))
+        # label = self.convert_rgb_to_grey_scale(label_rgb)
+        label = np.array(Image.open(lbl_path).convert("L"))
 
         if self.transform:
             transformed = self.transform(image=image, mask=label)

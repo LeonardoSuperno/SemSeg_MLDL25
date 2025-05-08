@@ -1,5 +1,5 @@
 # Core
-EPOCHS = 5
+EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
 PROJECT_STEP = 'Step3_1'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
@@ -38,7 +38,7 @@ GTA = {
 
 # Paths
 CITYSCAPES_PATH = '/kaggle/input/cityscapes/Cityscapes/Cityspaces'
-GTA5_PATH = 'data/GTA5_with_mask'
+GTA5_PATH = '/kaggle/input/gta5-withmask/GTA5'
 DEEPLABV2_PATH = '/kaggle/input/deeplab-resnet-pretrained-imagenet/deeplab_resnet_pretrained_imagenet.pth'
 OUTPUT_ROOT = '/kaggle/working/'
 CHECKPOINT_ROOT = None #['/kaggle/input/checkpoint/checkpoint', None]
