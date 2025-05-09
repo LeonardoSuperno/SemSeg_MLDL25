@@ -41,4 +41,4 @@ CITYSCAPES_PATH = '/kaggle/input/cityscapes/Cityscapes/Cityspaces'
 GTA5_PATH = '/kaggle/input/gta5-withmask/GTA5'
 DEEPLABV2_PATH = '/kaggle/input/deeplab-resnet-pretrained-imagenet/deeplab_resnet_pretrained_imagenet.pth'
 OUTPUT_ROOT = '/kaggle/working/'
-CHECKPOINT_ROOT = None #['/kaggle/input/checkpoint/checkpoint', None]
+CHECKPOINT_ROOT = '/kaggle/input/checkpoint/checkpoint' #['/kaggle/input/checkpoint/checkpoint', None]

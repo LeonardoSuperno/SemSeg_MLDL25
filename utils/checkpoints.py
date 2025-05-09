@@ -184,7 +184,7 @@ def load_checkpoint(checkpoint_root: str,
     
     
     # Check if the checkpoint file exists
-    if checkpoint_root != None:
+    if checkpoint_root != None and os.path.exists(checkpoint_root):
 
         # Construct the path to the checkpoint file
         checkpoint_path = f'{checkpoint_root}/checkpoint.pth'
