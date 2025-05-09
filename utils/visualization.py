@@ -232,12 +232,13 @@ def plot_segmented_images(model_roots: list,
     outputs = []
     with torch.no_grad():
         for image in selected_images:
+            image = image.to(device)
             model_outputs = []
             for model in models:
                 output = model(image.unsqueeze(0))
                 output = torch.argmax(torch.softmax(output, dim=1), dim=1)
                 output = np.squeeze(output)
-                segmented_image = label_to_rgb(output)
+                segmented_image = label_to_rgb(output.cpu())
                 model_outputs.append(segmented_image)
             outputs.append(model_outputs)
 
@@ -264,3 +265,5 @@ def plot_segmented_images(model_roots: list,
     
     plt.tight_layout()
     plt.show()
+    output_file = os.path.join(OUTPUT_ROOT, "test_results.png")
+    plt.savefig(output_file, format="png")
