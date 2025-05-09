@@ -121,7 +121,7 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
             A.HorizontalFlip(p=0.5),
             A.ColorJitter(brightness=(0.8, 1.2), contrast=(0.7, 1.0), saturation=(0.7, 1.0), hue=0, p=0.5),
             A.GaussianBlur(p=0.5, sigma_limit=(0.2, 0.6)),
-            A.RandomResizedCrop(size=(512,1024), ratio=(2,2)),
+            A.RandomResizedCrop(size=(GTA['height'],GTA['width']), ratio=(GTA['width']/GTA['height'],GTA['width']/GTA['height'])),
             A.Rotate(limit=(-10,10)),
             A.Resize(GTA['height'], GTA['width'])  
         ]),
