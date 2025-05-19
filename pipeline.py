@@ -3,7 +3,6 @@ from typing import Tuple, List, Union
 from config import *
 from builder import *
 from train_val import train_val
-from evaluation import evaluate_model
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *

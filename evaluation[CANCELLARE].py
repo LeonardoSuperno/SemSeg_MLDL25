@@ -1,8 +1,6 @@
-import torch
 import numpy as np
-from typing import Tuple, Dict
-from tqdm import tqdm
 
+'''
 def fast_hist(true, pred, num_classes):
     mask = (true >= 0) & (true < num_classes)
     hist = np.bincount(
@@ -13,6 +11,7 @@ def fast_hist(true, pred, num_classes):
 
 def per_class_iou(hist):
     return np.diag(hist) / (hist.sum(1) + hist.sum(0) - np.diag(hist) + 1e-10)
+
 
 def evaluate_model(model: torch.nn.Module,
                    dataloader: torch.utils.data.DataLoader,
@@ -49,5 +48,6 @@ def evaluate_model(model: torch.nn.Module,
     results["accuracy"] = round(acc, 4)
 
     return results
+'''
 
 
