@@ -1,3 +1,4 @@
+from models.discriminator.discriminator import FCDiscriminator
 import numpy as np
 import torch
 import torch.nn as nn
@@ -88,7 +89,7 @@ def build_model(model_name: str,
     
     # Initialize adversarial components if adversarial is True
     if adversarial:
-        #model_D = FCDiscriminator(num_classes=n_classes).to(device)
+        model_D = FCDiscriminator(num_classes=n_classes).to(device)
         if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
             model_D = torch.nn.DataParallel(model_D).to(device)
         optimizer_D = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))

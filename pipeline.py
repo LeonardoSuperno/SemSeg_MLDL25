@@ -3,6 +3,7 @@ from typing import Tuple, List, Union
 from config import *
 from builder import *
 from train_val import train_val
+from adversarial_train_val import adversarial_train_val
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *
@@ -86,24 +87,38 @@ def pipeline (model_name: str,
                                                                     batch_size,
                                                                     n_workers,
                                                                     adversarial)
-    
-    model_results = train_val(model=model,
-                          model_D = model_D,
-                          optimizer=optimizer, 
-                          optimizer_D = optimizer_D,
-                          loss_fn = loss_fn, 
-                          loss_D = loss_D,
-                          train_loader=train_loader, 
-                          val_loader=val_loader, 
-                          epochs=epochs, 
-                          device=device, 
-                          output_root=output_root,
-                          checkpoint_root=checkpoint_root,
-                          project_step=project_step,
-                          verbose=verbose,
-                          n_classes=n_classes,
-                          power=power,
-                          adversarial=adversarial)
+    if adversarial:
+        model_results = adversarial_train_val(model=model, 
+                                            model_D = model_D,
+                                            optimizer=optimizer, 
+                                            optimizer_D = optimizer_D, 
+                                            ce_loss=loss_fn, 
+                                            bce_loss=loss_D, 
+                                            dataloaders=train_loader, 
+                                            val_loader=val_loader, 
+                                            epochs=epochs, 
+                                            device=device, 
+                                            output_root=output_root,
+                                            checkpoint_root=checkpoint_root,
+                                            project_step=project_step,
+                                            verbose=verbose,
+                                            n_classes=n_classes,
+                                            power=power,
+                                            adversarial=adversarial)
+    else:
+        model_results = train_val(model=model,
+                            optimizer=optimizer, 
+                            loss_fn = loss_fn, 
+                            train_loader=train_loader, 
+                            val_loader=val_loader, 
+                            epochs=epochs, 
+                            device=device, 
+                            output_root=output_root,
+                            checkpoint_root=checkpoint_root,
+                            project_step=project_step,
+                            verbose=verbose,
+                            n_classes=n_classes,
+                            power=power)
 
     # # Evaluation on validation set
     # eval_metrics = evaluate_model(model=model,

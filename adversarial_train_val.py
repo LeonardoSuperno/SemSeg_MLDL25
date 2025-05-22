@@ -12,135 +12,192 @@ from itertools import cycle
 
 
 def adversarial_train_val(model: torch.nn.Module, 
-                           model_D: torch.nn.Module, 
-                           loss_fn: torch.nn.Module, 
-                           loss_D: torch.nn.Module, 
-                           optimizer: torch.optim.Optimizer, 
-                           optimizer_D: torch.optim.Optimizer, 
-                           dataloaders: Tuple[DataLoader,DataLoader], 
-                           device: str, 
-                           n_classes: int = 19)-> Tuple[float, float, float]:
-    """
-    Perform a single adversarial training step for semantic segmentation.
-
-    Args:
-    - model (torch.nn.Module): Segmentation model.
-    - model_D (torch.nn.Module): Discriminator model.
-    - loss_fn (torch.nn.Module): Segmentation loss function.
-    - loss_D (torch.nn.Module): Adversarial loss function for discriminator.
-    - optimizer (torch.optim.Optimizer): Optimizer for segmentation model.
-    - optimizer_D (torch.optim.Optimizer): Optimizer for discriminator model.
-    - dataloaders (Tuple[DataLoader,DataLoader]): Source and target dataloaders for training data.
-    - device (str): Device on which to run the models ('cuda' or 'cpu').
-    - n_classes (int, optional): Number of classes for segmentation. Default is 19.
-
-    Returns:
-    - Tuple containing:
-        - epoch_loss (float): Average segmentation loss for the epoch.
-        - epoch_miou (float): Mean Intersection over Union (mIoU) for the epoch.
-        - epoch_iou (np.ndarray): Array of per-class IoU values for the epoch.
-    """
-
-    model_G = model.to(device)
-    optimizer_G = optimizer
-    ce_loss = loss_fn
-    bce_loss = loss_D
-
-    # labels for adversarial training
-    source_label = 0
-    target_label = 1
+          model_D: torch.nn.Module, 
+          optimizer: torch.optim.Optimizer, 
+          optimizer_D: torch.optim.Optimizer, 
+          ce_loss: torch.nn.Module, 
+          bce_loss: torch.nn.Module, 
+          dataloaders: Tuple[DataLoader,DataLoader], 
+          val_loader: DataLoader, 
+          epochs: int, 
+          device: str, 
+          output_root: str,
+          checkpoint_root: str,
+          project_step: str,
+          verbose: bool,
+          n_classes: int = 19,
+          power: float = 0.9,
+          adversarial: bool = True) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
     
-    interp_source = nn.Upsample(size=(GTA['height'], GTA['width']), mode='bilinear')
-    interp_target = nn.Upsample(size=(CITYSCAPES['height'], CITYSCAPES['width']), mode='bilinear')
-    
-    lambda_adv = 0.001
-    total_loss = 0
-    total_miou = 0
-    total_iou = np.zeros(n_classes)
-    
-    iterations = 0
-    
-    model_G.train()
-    model_D.train()
-    
-    source_loader, target_loader = dataloaders
-    train_loader = zip(source_loader, cycle(target_loader)) # make target_loader cycle in order to match length of source_loader
-    
-    
-    for (source_data, source_labels), (target_data, _) in train_loader:
+    # Load or initialize checkpoint
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, project_step=project_step, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
         
-        iterations+=1
+    if no_checkpoint:
+        train_loss_list, train_miou_list = [], []
+        val_loss_list, val_miou_list = [], []
+        start_epoch = 0
+    
+    for epoch in (range(start_epoch, epochs)):
 
-        source_data, source_labels = source_data.to(device), source_labels.to(device)
-        target_data = target_data.to(device)
+        # labels for adversarial training
+        adversarial_source_label = 0
+        adversarial_target_label = 1
         
-        optimizer_G.zero_grad()
-        optimizer_D.zero_grad()
-
-        #TRAIN GENERATOR
+        interp_source = nn.Upsample(size=(GTA['height'], GTA['width']), mode='bilinear')
+        interp_target = nn.Upsample(size=(CITYSCAPES['height'], CITYSCAPES['width']), mode='bilinear')
         
-        #Train Segmentation (only source)
-        for param in model_D.parameters():
-            param.requires_grad = False # The Discriminator parameters don't receive the gradients, so the weights remain fixed
+        lambda_adv = 0.001
+        total_loss = 0
+        total_miou = 0
+        total_iou = np.zeros(n_classes)
         
-        output_source = model_G(source_data)
-        output_source = interp_source(output_source) # apply upsample
-
-        segmentation_loss = ce_loss(output_source, source_labels)
-        segmentation_loss.backward()
-
-        #Train to fool the Discriminator (source + target)
-        output_target = model_G(target_data)
-        output_target = interp_target(output_target) # apply upsample
+        iterations = 0
         
-        prediction_target = torch.nn.functional.softmax(output_target)
-        discriminator_output_target = model_D(prediction_target)
-        discriminator_label_source = torch.FloatTensor(discriminator_output_target.data.size()).fill_(source_label).cuda() # 0 = source domain
+        model.train()
+        model_D.train()
         
-        adversarial_loss = bce_loss(discriminator_output_target, discriminator_label_source) # The generator try to fool the discriminator
-        discriminator_loss = lambda_adv * adversarial_loss
-        discriminator_loss.backward() # Only for the Generator
+        source_loader, target_loader = dataloaders        
         
-        
-        #TRAIN DISCRIMINATOR
-        
-        #Train with source
-        for param in model_D.parameters():
-            param.requires_grad = True
+        for (source_data, source_label), (target_data, _) in zip(source_loader, cycle(target_loader)):
             
-        output_source = output_source.detach()
-        
-        prediction_source = torch.nn.functional.softmax(output_source)
-        discriminator_output_source = model_D(prediction_source)
-        discriminator_label_source = torch.FloatTensor(discriminator_output_source.data.size()).fill_(source_label).cuda() # 0 = source domain
-        discriminator_loss_source = bce_loss(discriminator_output_source, discriminator_label_source)
-        discriminator_loss_source.backward()
+            iterations+=1
 
-        #Train with target
-        output_target = output_target.detach()
-        
-        prediction_target = torch.nn.functional.softmax(output_target)
-        discriminator_output_target = model_D(prediction_target)
-        discriminator_label_target = torch.FloatTensor(discriminator_output_target.data.size()).fill_(target_label).cuda() # 1 = target domain
-        
-        discriminator_loss_target = bce_loss(discriminator_output_target, discriminator_label_target)
-        discriminator_loss_target.backward()
-        
-        optimizer_G.step()
-        optimizer_D.step()
-        
-        total_loss += segmentation_loss.item()
-        
-        prediction_source = torch.argmax(torch.softmax(output_source, dim=1), dim=1)
-        hist = fast_hist(source_labels.cpu().numpy(), prediction_source.cpu().numpy(), n_classes)
-        running_iou = np.array(per_class_iou(hist)).flatten()
-        total_miou += running_iou.sum()
-        total_iou += running_iou
+            source_data, source_label = source_data.to(device), source_label.to(device)
+            target_data = target_data.to(device)
+            
+            optimizer.zero_grad()
+            optimizer_D.zero_grad()
 
+            #TRAIN GENERATOR
+            
+            #Train Segmentation (only source)
+            for param in model_D.parameters():
+                param.requires_grad = False # The Discriminator parameters don't receive the gradients, so the weights remain fixed
+            
+            source_output = interp_source(model(source_data))
+
+            segmentation_loss = ce_loss(source_output, source_label)
+            segmentation_loss.backward()
+
+            #Train to segment train images like source images
+            output_target = interp_target(model(target_data))
+            
+            prediction_target = torch.nn.functional.softmax(output_target)
+            discriminator_output_target = model_D(prediction_target)
+            discriminator_label_source = torch.FloatTensor(discriminator_output_target.data.size()).fill_(adversarial_source_label).cuda() # 0 = source domain
+            
+            adversarial_loss = bce_loss(discriminator_output_target, discriminator_label_source) 
+            discriminator_loss = lambda_adv * adversarial_loss
+            discriminator_loss.backward() # Only for the Generator
+            
+            
+            #TRAIN DISCRIMINATOR
+            
+            #Train with source
+            for param in model_D.parameters():
+                param.requires_grad = True
+                
+            source_output = source_output.detach()
+            
+            prediction_source = torch.nn.functional.softmax(source_output)
+            discriminator_output_source = model_D(prediction_source)
+            discriminator_label_source = torch.FloatTensor(discriminator_output_source.data.size()).fill_(adversarial_source_label).cuda()
+            discriminator_loss_source = bce_loss(discriminator_output_source, discriminator_label_source)
+            discriminator_loss_source.backward()
+
+            #Train with target
+            output_target = output_target.detach()
+            
+            prediction_target = torch.nn.functional.softmax(output_target)
+            discriminator_output_target = model_D(prediction_target)
+            discriminator_label_target = torch.FloatTensor(discriminator_output_target.data.size()).fill_(adversarial_target_label).cuda()
+            
+            discriminator_loss_target = bce_loss(discriminator_output_target, discriminator_label_target)
+            discriminator_loss_target.backward()
+            
+            optimizer.step()
+            optimizer_D.step()
+            
+            total_loss += segmentation_loss.item()
+            
+            prediction_source = torch.argmax(torch.softmax(source_output, dim=1), dim=1)
+            hist = fast_hist(source_label.cpu().numpy(), prediction_source.cpu().numpy(), n_classes)
+            running_iou = np.array(per_class_iou(hist)).flatten()
+            total_miou += running_iou.sum()
+            total_iou += running_iou
+
+            
+        train_loss = total_loss / iterations
+        train_miou = total_miou / (iterations * n_classes)
+        train_iou = total_iou / iterations
+
+        # Validation
+
+        total_loss = 0
+        total_miou = 0
+        total_iou = np.zeros(n_classes)
         
-    epoch_loss = total_loss / iterations
-    epoch_miou = total_miou / (iterations * n_classes)
-    epoch_iou = total_iou / iterations
+        model.eval()
+
+        with torch.inference_mode(): # which is analogous to torch.no_grad
+            for image, label in val_loader:        
+                image, label = image.to(device), label.type(torch.LongTensor).to(device)
+                
+                output = model(image)
+                loss = ce_loss(output, label)
+                total_loss += loss.item()
+                
+                prediction = torch.argmax(torch.softmax(output, dim=1), dim=1)
+                
+                hist = fast_hist(label.cpu().numpy(), prediction.cpu().numpy(), n_classes)
+                running_iou = np.array(per_class_iou(hist)).flatten()
+                total_miou += running_iou.sum()
+                total_iou += running_iou
+        
+        val_loss = total_loss / len(val_loader)
+        val_miou = total_miou / (len(val_loader)* n_classes)
+        val_iou = total_iou / len(val_loader)
+
+        # Append metrics to lists
+        train_loss_list.append(train_loss) 
+        train_miou_list.append(train_miou) 
+        val_loss_list.append(val_loss)
+        val_miou_list.append(val_miou)
+
+        # Print statistics if verbose 
+        print_stats(epoch=epoch, 
+                    train_loss=train_loss,
+                    val_loss=val_loss, 
+                    train_miou=train_miou, 
+                    val_miou=val_miou, 
+                    verbose=verbose)
+
+        # Adjust learning rate
+        poly_lr_scheduler(optimizer=optimizer,
+                          init_lr=optimizer.param_groups[0]['lr'],
+                          iter=epoch,
+                          lr_decay_iter=1, 
+                          max_iter=epochs,
+                          power=power)
+        
+        # Save checkpoint after each epoch
+        save_checkpoint(output_root=output_root, 
+                        project_step=project_step,
+                        adversarial=adversarial,
+                        model=model, 
+                        model_D=model_D,
+                        optimizer=optimizer, 
+                        optimizer_D=optimizer_D, 
+                        epoch=epoch,
+                        train_loss_list=train_loss_list, 
+                        train_miou_list=train_miou_list,
+                        train_iou=train_iou,
+                        val_loss_list=val_loss_list,
+                        val_miou_list=val_miou_list,
+                        val_iou=val_iou,
+                        verbose=verbose)
+
+
+    return train_loss_list, val_loss_list, train_miou_list, val_miou_list, train_iou, val_iou
     
-    return epoch_loss, epoch_miou, epoch_iou
 

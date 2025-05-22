@@ -2,10 +2,10 @@
 EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
-PROJECT_STEP = 'Step3_2'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
+PROJECT_STEP = 'Step4'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
 VERBOSE = True
 EVAL_ITERATIONS = 100
-ADVERSARIAL = False
+ADVERSARIAL = True
 
 # Model
 MODEL_NAME = 'BiSeNet'  # [DeepLabV2, BiSeNet]
@@ -23,8 +23,8 @@ IGNORE_INDEX = 255
 N_CLASSES = 19
 TRAIN_DATASET_NAME = 'GTA5'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
-AUGMENTED = False
-AUGMENTED_TYPE = 'aug2'  # ['aug1', 'aug2', 'aug3', 'aug4']
+AUGMENTED = True
+AUGMENTED_TYPE = 'aug3'  # ['aug1', 'aug2', 'aug3', 'aug4']
 BATCH_SIZE = 6  # [2, 4, 8]
 N_WORKERS = 6 # [0, 2, 4]
 CITYSCAPES = {
@@ -41,4 +41,4 @@ CITYSCAPES_PATH = '/kaggle/input/cityscapes/Cityscapes/Cityspaces'
 GTA5_PATH = '/kaggle/input/gta5-withmask/GTA5'
 DEEPLABV2_PATH = '/kaggle/input/deeplab-resnet-pretrained-imagenet/deeplab_resnet_pretrained_imagenet.pth'
 OUTPUT_ROOT = '/kaggle/working/'
-CHECKPOINT_ROOT = '/kaggle/input/checkpoint/checkpoint' #['/kaggle/input/checkpoint/checkpoint', None]
+CHECKPOINT_ROOT = None #['/kaggle/input/checkpoint/checkpoint', None]
