@@ -8,6 +8,7 @@ import albumentations as A
 from utils.data_processing import get_augmented_data
 #from models import BiSeNet, get_deeplab_v2, FCDiscriminator
 from models.bisenet.build_bisenet import BiSeNet
+from models.bisenet.build_multy_bisenet import Multy_BiSeNet
 from models.deeplabv2.deeplabv2 import get_deeplab_v2
 from config import CITYSCAPES, GTA, DEEPLABV2_PATH, CITYSCAPES_PATH, GTA5_PATH
 from datasets.cityscapes import CityScapes
@@ -18,13 +19,12 @@ def build_model(model_name: str,
              n_classes: int,
              device: str,
              parallelize: bool,
-             optimizer_name: str, 
              lr: float,
-             momentum: float,
-             weight_decay: float,
              loss_fn_name: str,
              ignore_index: int,
-             adversarial: bool) -> Tuple[torch.nn.Module, torch.optim.Optimizer, torch.nn.Module, torch.nn.Module, torch.optim.Optimizer, torch.nn.Module]:
+             adversarial: bool,
+             multy_level:bool,
+             feature:str) -> Tuple[torch.nn.Module, torch.optim.Optimizer, torch.nn.Module, torch.nn.Module, torch.optim.Optimizer, torch.nn.Module]:
     """
     Set up components for semantic segmentation model training.
 
@@ -67,19 +67,22 @@ def build_model(model_name: str,
         if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
             model = torch.nn.DataParallel(model).to(device)
     elif model_name == 'BiSeNet':
-        model = BiSeNet(num_classes=n_classes, context_path="resnet18").to(device)
-        if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
-            model = torch.nn.DataParallel(model).to(device)
+        if multy_level:
+            model = Multy_BiSeNet(num_classes=n_classes, context_path="resnet18").to(device)
+            if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
+                model = torch.nn.DataParallel(model).to(device)
+        else:
+            model = BiSeNet(num_classes=n_classes, context_path="resnet18", feature=feature).to(device)
+            if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
+                model = torch.nn.DataParallel(model).to(device)
+            
     else:
         raise ValueError('Model accepted: [DeepLabV2, BiSeNet]')
             
-    # Initialize optimizer based on optimizer_name
-    if optimizer_name == 'Adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    elif optimizer_name == 'SGD':
-        optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
-    else:
-        raise ValueError('Optimizer accepted: [Adam, SGD]')
+    
+    # Initialize the optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    
         
     # Initialize loss function based on loss_fn_name
     if loss_fn_name == 'CrossEntropyLoss':
@@ -89,11 +92,25 @@ def build_model(model_name: str,
     
     # Initialize adversarial components if adversarial is True
     if adversarial:
-        model_D = FCDiscriminator(num_classes=n_classes).to(device)
-        if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
-            model_D = torch.nn.DataParallel(model_D).to(device)
-        optimizer_D = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
-        loss_D = torch.nn.BCEWithLogitsLoss()
+        if multy_level:
+            model_D1 = FCDiscriminator(num_classes=n_classes).to(device)
+            if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
+                model_D1 = torch.nn.DataParallel(model_D1).to(device)
+            model_D2 = FCDiscriminator(num_classes=n_classes).to(device)
+            if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
+                model_D2 = torch.nn.DataParallel(model_D2).to(device)
+            model_D = (model_D1, model_D2)
+            optimizer_D1 = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
+            optimizer_D2 = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
+            optimizer_D = (optimizer_D1, optimizer_D2)
+
+            loss_D = torch.nn.BCEWithLogitsLoss()
+        else:
+            model_D = FCDiscriminator(num_classes=n_classes).to(device)
+            if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
+                model_D = torch.nn.DataParallel(model_D).to(device)
+            optimizer_D = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
+            loss_D = torch.nn.BCEWithLogitsLoss()
         
     return model, optimizer, loss_fn, model_D, optimizer_D, loss_D
 

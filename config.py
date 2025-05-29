@@ -2,19 +2,18 @@
 EPOCHS = 50
 DEVICE = 'cuda'
 PARALLELIZE = True
-PROJECT_STEP = 'Step4'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4]
+PROJECT_STEP = 'Step5'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4, Step5]
 VERBOSE = True
 EVAL_ITERATIONS = 100
 ADVERSARIAL = True
+MULTI_LEVEL = True
+FEATURE = 'spatial' # ['spatial', 'context']
 
 # Model
 MODEL_NAME = 'BiSeNet'  # [DeepLabV2, BiSeNet]
 
 # Optimizer
-OPTIMIZER_NAME = 'Adam'  # [SGD, Adam]
 LOSS_FN_NAME = 'CrossEntropyLoss'  # [CrossEntropyLoss]
-WEIGHT_DECAY = 5e-4
-MOMENTUM = 0.9
 LR = 2.5e-4
 POWER = 0.9  # for poly_lr_scheduler 
 IGNORE_INDEX = 255
@@ -26,7 +25,7 @@ VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = True
 AUGMENTED_TYPE = 'aug3'  # ['aug1', 'aug2', 'aug3', 'aug4']
 BATCH_SIZE = 6  # [2, 4, 8]
-N_WORKERS = 6 # [0, 2, 4]
+N_WORKERS = 2 # [0, 2, 4]
 CITYSCAPES = {
     'width': 1024,
     'height': 512

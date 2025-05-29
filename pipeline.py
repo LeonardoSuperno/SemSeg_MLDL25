@@ -4,6 +4,7 @@ from config import *
 from builder import *
 from train_val import train_val
 from adversarial_train_val import adversarial_train_val
+from multy_adversarial_train_val import multy_adversarial_train_val
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *
@@ -17,10 +18,9 @@ def pipeline (model_name: str,
               epochs: int,
               augmented: bool,
               augmentedType:str,
-              optimizer_name: str,
+              multi_level:bool,
+              feature:str,
               lr:float,
-              momentum:float,
-              weight_decay:float,
               loss_fn_name: str,
               ignore_index:int,
               batch_size: int,
@@ -70,14 +70,13 @@ def pipeline (model_name: str,
     model, optimizer, loss_fn, model_D, optimizer_D, loss_D = build_model(model_name, 
                                                                        n_classes,
                                                                        device,
-                                                                       parallelize,
-                                                                       optimizer_name, 
+                                                                       parallelize, 
                                                                        lr,
-                                                                       momentum,
-                                                                       weight_decay,
                                                                        loss_fn_name,
                                                                        ignore_index,
-                                                                       adversarial)
+                                                                       adversarial,
+                                                                       multi_level,
+                                                                       feature)
 
     # get loader
     train_loader, val_loader, data_height, data_width = build_loaders(train_dataset_name, 
@@ -88,7 +87,8 @@ def pipeline (model_name: str,
                                                                     n_workers,
                                                                     adversarial)
     if adversarial:
-        model_results = adversarial_train_val(model=model, 
+        if multi_level:
+            model_results = multy_adversarial_train_val(model=model, 
                                             model_D = model_D,
                                             optimizer=optimizer, 
                                             optimizer_D = optimizer_D, 
@@ -105,6 +105,26 @@ def pipeline (model_name: str,
                                             n_classes=n_classes,
                                             power=power,
                                             adversarial=adversarial)
+        else:
+            model_results = adversarial_train_val(model=model, 
+                                            model_D = model_D,
+                                            optimizer=optimizer, 
+                                            optimizer_D = optimizer_D, 
+                                            ce_loss=loss_fn, 
+                                            bce_loss=loss_D, 
+                                            dataloaders=train_loader, 
+                                            val_loader=val_loader, 
+                                            epochs=epochs, 
+                                            device=device, 
+                                            output_root=output_root,
+                                            checkpoint_root=checkpoint_root,
+                                            project_step=project_step,
+                                            verbose=verbose,
+                                            n_classes=n_classes,
+                                            power=power,
+                                            adversarial=adversarial)
+            
+        
     else:
         model_results = train_val(model=model,
                             optimizer=optimizer, 
