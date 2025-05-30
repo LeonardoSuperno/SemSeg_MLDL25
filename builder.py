@@ -68,11 +68,11 @@ def build_model(model_name: str,
             model = torch.nn.DataParallel(model).to(device)
     elif model_name == 'BiSeNet':
         if multy_level:
-            model = Multy_BiSeNet(num_classes=n_classes, context_path="resnet18").to(device)
+            model = Multy_BiSeNet(num_classes=n_classes, context_path="resnet18", feature=feature).to(device)
             if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
                 model = torch.nn.DataParallel(model).to(device)
         else:
-            model = BiSeNet(num_classes=n_classes, context_path="resnet18", feature=feature).to(device)
+            model = BiSeNet(num_classes=n_classes, context_path="resnet18").to(device)
             if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
                 model = torch.nn.DataParallel(model).to(device)
             
@@ -100,8 +100,8 @@ def build_model(model_name: str,
             if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
                 model_D2 = torch.nn.DataParallel(model_D2).to(device)
             model_D = (model_D1, model_D2)
-            optimizer_D1 = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
-            optimizer_D2 = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
+            optimizer_D1 = torch.optim.Adam(model_D1.parameters(), lr=1e-3, betas=(0.9, 0.99))
+            optimizer_D2 = torch.optim.Adam(model_D2.parameters(), lr=1e-3, betas=(0.9, 0.99))
             optimizer_D = (optimizer_D1, optimizer_D2)
 
             loss_D = torch.nn.BCEWithLogitsLoss()

@@ -11,7 +11,7 @@ from config import GTA, CITYSCAPES
 from itertools import cycle
 
 
-def multy_adversarial_train_val(model: torch.nn.Module, 
+def multi_adversarial_train_val(model: torch.nn.Module, 
           model_D: torch.nn.Module, 
           optimizer: torch.optim.Optimizer, 
           optimizer_D: torch.optim.Optimizer, 
@@ -23,14 +23,14 @@ def multy_adversarial_train_val(model: torch.nn.Module,
           device: str, 
           output_root: str,
           checkpoint_root: str,
-          project_step: str,
           verbose: bool,
           n_classes: int = 19,
           power: float = 0.9,
-          adversarial: bool = True) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
+          adversarial: bool = True,
+          multi_level: bool = True) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
     
     # Load or initialize checkpoint
-    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, project_step=project_step, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D, multi_level=multi_level)
         
     if no_checkpoint:
         train_loss_list, train_miou_list = [], []
@@ -141,6 +141,9 @@ def multy_adversarial_train_val(model: torch.nn.Module,
             discriminator_loss_source1 = bce_loss(discriminator_output_source1, discriminator_label_source)
             discriminator_loss_source2 = bce_loss(discriminator_output_source2, discriminator_label_source)
 
+            discriminator_loss_source1 = discriminator_loss_source1 / 2
+            discriminator_loss_source2 = discriminator_loss_source2 / 2
+
             discriminator_loss_source1.backward()
             discriminator_loss_source2.backward()
 
@@ -158,6 +161,9 @@ def multy_adversarial_train_val(model: torch.nn.Module,
             
             discriminator_loss_target1 = bce_loss(discriminator_output_target1, discriminator_label_target)
             discriminator_loss_target2 = bce_loss(discriminator_output_target2, discriminator_label_target)
+
+            discriminator_loss_target1 = discriminator_loss_target1 / 2
+            discriminator_loss_target2 = discriminator_loss_target2 / 2
             
             discriminator_loss_target1.backward()
             discriminator_loss_target2.backward()
@@ -230,7 +236,6 @@ def multy_adversarial_train_val(model: torch.nn.Module,
         
         # Save checkpoint after each epoch
         save_checkpoint(output_root=output_root, 
-                        project_step=project_step,
                         adversarial=adversarial,
                         model=model, 
                         model_D=model_D,
@@ -243,7 +248,8 @@ def multy_adversarial_train_val(model: torch.nn.Module,
                         val_loss_list=val_loss_list,
                         val_miou_list=val_miou_list,
                         val_iou=val_iou,
-                        verbose=verbose)
+                        verbose=verbose,
+                        multi_level=multi_level)
 
 
     return train_loss_list, val_loss_list, train_miou_list, val_miou_list, train_iou, val_iou

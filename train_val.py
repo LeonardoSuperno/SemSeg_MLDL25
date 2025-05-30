@@ -19,42 +19,14 @@ def train_val(model: torch.nn.Module,
           device: str, 
           output_root: str,
           checkpoint_root: str,
-          project_step: str,
           verbose: bool,
           n_classes: int = 19,
           power: float = 0.9,
-          adversarial: bool = False) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
-    """
-    Train a semantic segmentation model with optional adversarial training.
-
-    Args:
-        model (torch.nn.Module): Semantic segmentation model.
-        model_D (torch.nn.Module): Discriminator model for adversarial training.
-        optimizer (torch.optim.Optimizer): Optimizer for the segmentation model.
-        optimizer_D (torch.optim.Optimizer): Optimizer for the discriminator.
-        loss_fn (torch.nn.Module): Loss function for segmentation.
-        loss_D (torch.nn.Module): Loss function for adversarial training.
-        train_loader (Union[DataLoader, Tuple[DataLoader,DataLoader]]): DataLoader(s) for the training dataset.
-        val_loader (DataLoader): DataLoader for validation data.
-        epochs (int): Number of epochs to train.
-        device (str): Device on which to run computations ('cuda' or 'cpu').
-        checkpoint_root (str): Root directory to save checkpoints.
-        project_step (str): Name/id of the project or step.
-        verbose (bool): Whether to print verbose training statistics.
-        n_classes (int, optional): Number of classes for segmentation. Defaults to 19.
-        power (float, optional): Power parameter for learning rate scheduler. Defaults to 0.9.
-        adversarial (bool, optional): Whether to use adversarial training. Defaults to False.
-Returns:
-        Tuple containing lists of:
-        - train_loss_list (List[float]): List of training losses per epoch.
-        - val_loss_list (List[float]): List of validation losses per epoch.
-        - train_miou_list (List[float]): List of training mIoU per epoch.
-        - val_miou_list (List[float]): List of validation mIoU per epoch.
-        - train_iou (List[float]): List of per-class IoU for training per epoch.
-        - val_iou (List[float]): List of per-class IoU for validation per epoch.
-    """
+          adversarial: bool = False,
+          multi_level: bool = False) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
+    
     # Load or initialize checkpoint
-    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, project_step=project_step, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=None, optimizer=optimizer, optimizer_D=None, multi_level=multi_level)
         
     if no_checkpoint:
         train_loss_list, train_miou_list = [], []
@@ -145,7 +117,6 @@ Returns:
         
         # Save checkpoint after each epoch
         save_checkpoint(output_root=output_root, 
-                        project_step=project_step,
                         adversarial=adversarial,
                         model=model,
                         optimizer=optimizer,
@@ -156,7 +127,8 @@ Returns:
                         val_loss_list=val_loss_list,
                         val_miou_list=val_miou_list,
                         val_iou=val_iou,
-                        verbose=verbose)
+                        verbose=verbose,
+                        multi_level=multi_level)
 
 
     return train_loss_list, val_loss_list, train_miou_list, val_miou_list, train_iou, val_iou

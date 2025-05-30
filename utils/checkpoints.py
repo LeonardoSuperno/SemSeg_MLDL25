@@ -75,8 +75,7 @@ def save_results(model_results: List[List[float]],
         for i, iou in enumerate(model_results[5]):
             file.write(f"{get_id_to_label()[i]}: {iou}\n")
 
-def save_checkpoint(output_root: str,
-                    project_step: str, 
+def save_checkpoint(output_root: str, 
                     adversarial: bool,
                     model: torch.nn.Module, 
                     model_D: torch.nn.Module, 
@@ -89,7 +88,8 @@ def save_checkpoint(output_root: str,
                     val_loss_list: List[float],
                     val_miou_list: List[float],
                     val_iou: List[float],
-                    verbose: bool)->None:
+                    verbose: bool,
+                    multi_level: bool = False)->None:
     """
     Saves the current state of the training process to a checkpoint file.
 
@@ -120,7 +120,24 @@ def save_checkpoint(output_root: str,
     
     # Save the state of the training process, including model parameters, optimizers, and performance metrics
     if adversarial:
-        torch.save({
+        if multi_level:
+            torch.save({
+            'model': model.state_dict(),
+            'model_D1': model_D[0].state_dict(),
+            'model_D2': model_D[1].state_dict(),
+            'optimizer': optimizer.state_dict(),
+            'optimizer_D1': optimizer_D[0].state_dict(),
+            'optimizer_D2': optimizer_D[1].state_dict(),
+            'epoch': epoch + 1,
+            'train_loss_list': train_loss_list,
+            'train_miou_list': train_miou_list,
+            'train_iou': train_iou,
+            'val_loss_list': val_loss_list,
+            'val_miou_list': val_miou_list,
+            'val_iou': val_iou
+        }, checkpoint_path)
+        else:
+            torch.save({
             'model': model.state_dict(),
             'model_D': model_D.state_dict(),
             'optimizer': optimizer.state_dict(),
@@ -150,13 +167,13 @@ def save_checkpoint(output_root: str,
     if verbose == True:
         print(f"Checkpoint saved in {checkpoint_path}")
     
-def load_checkpoint(checkpoint_root: str,
-                    project_step: str, 
+def load_checkpoint(checkpoint_root: str, 
                     adversarial: bool,
                     model: torch.nn.Module, 
                     model_D: torch.nn.Module,
                     optimizer: torch.optim.Optimizer,
-                    optimizer_D: torch.optim.Optimizer) -> Tuple[bool, Optional[int], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]]]:
+                    optimizer_D: torch.optim.Optimizer,
+                    multi_level:bool = False) -> Tuple[bool, Optional[int], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]], Optional[List[float]]]:
     """
     Loads the checkpoint from the specified directory and restores the model, optimizer, and training state.
 
@@ -196,8 +213,14 @@ def load_checkpoint(checkpoint_root: str,
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         if adversarial:
-            model_D.load_state_dict(checkpoint['model_D'])
-            optimizer_D.load_state_dict(checkpoint['optimizer_D'])
+            if multi_level:
+                model_D[0].load_state_dict(checkpoint['model_D1'])
+                model_D[1].load_state_dict(checkpoint['model_D2'])
+                optimizer_D[0].load_state_dict(checkpoint['optimizer_D1'])
+                optimizer_D[1].load_state_dict(checkpoint['optimizer_D2'])
+            else:
+                model_D.load_state_dict(checkpoint['model_D'])
+                optimizer_D.load_state_dict(checkpoint['optimizer_D'])
         
         # Extract training state information
         start_epoch = checkpoint['epoch']

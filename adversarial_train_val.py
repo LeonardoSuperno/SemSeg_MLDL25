@@ -23,14 +23,14 @@ def adversarial_train_val(model: torch.nn.Module,
           device: str, 
           output_root: str,
           checkpoint_root: str,
-          project_step: str,
           verbose: bool,
           n_classes: int = 19,
           power: float = 0.9,
-          adversarial: bool = True) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
+          adversarial: bool = True,
+          multi_level: bool = False) -> Tuple[List[float], List[float], List[float], List[float], List[float], List[float]]:
     
     # Load or initialize checkpoint
-    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, project_step=project_step, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D)
         
     if no_checkpoint:
         train_loss_list, train_miou_list = [], []
@@ -182,7 +182,6 @@ def adversarial_train_val(model: torch.nn.Module,
         
         # Save checkpoint after each epoch
         save_checkpoint(output_root=output_root, 
-                        project_step=project_step,
                         adversarial=adversarial,
                         model=model, 
                         model_D=model_D,
@@ -195,7 +194,8 @@ def adversarial_train_val(model: torch.nn.Module,
                         val_loss_list=val_loss_list,
                         val_miou_list=val_miou_list,
                         val_iou=val_iou,
-                        verbose=verbose)
+                        verbose=verbose,
+                        multi_level=multi_level)
 
 
     return train_loss_list, val_loss_list, train_miou_list, val_miou_list, train_iou, val_iou

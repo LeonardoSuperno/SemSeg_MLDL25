@@ -4,7 +4,7 @@ from config import *
 from builder import *
 from train_val import train_val
 from adversarial_train_val import adversarial_train_val
-from multy_adversarial_train_val import multy_adversarial_train_val
+from multi_adversarial_train_val import multi_adversarial_train_val
 from utils.metrics import *
 from utils.optimization import *
 from utils.visualization import *
@@ -88,7 +88,7 @@ def pipeline (model_name: str,
                                                                     adversarial)
     if adversarial:
         if multi_level:
-            model_results = multy_adversarial_train_val(model=model, 
+            model_results = multi_adversarial_train_val(model=model, 
                                             model_D = model_D,
                                             optimizer=optimizer, 
                                             optimizer_D = optimizer_D, 
@@ -100,11 +100,11 @@ def pipeline (model_name: str,
                                             device=device, 
                                             output_root=output_root,
                                             checkpoint_root=checkpoint_root,
-                                            project_step=project_step,
                                             verbose=verbose,
                                             n_classes=n_classes,
                                             power=power,
-                                            adversarial=adversarial)
+                                            adversarial=adversarial,
+                                            multi_level=multi_level)
         else:
             model_results = adversarial_train_val(model=model, 
                                             model_D = model_D,
@@ -118,7 +118,6 @@ def pipeline (model_name: str,
                                             device=device, 
                                             output_root=output_root,
                                             checkpoint_root=checkpoint_root,
-                                            project_step=project_step,
                                             verbose=verbose,
                                             n_classes=n_classes,
                                             power=power,
@@ -135,7 +134,6 @@ def pipeline (model_name: str,
                             device=device, 
                             output_root=output_root,
                             checkpoint_root=checkpoint_root,
-                            project_step=project_step,
                             verbose=verbose,
                             n_classes=n_classes,
                             power=power)

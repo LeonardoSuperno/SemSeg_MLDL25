@@ -191,5 +191,5 @@ class Multy_BiSeNet(torch.nn.Module):
             return cx2_out, result
         
         else:
-            raise ValueError('feature accepted: [spatial, context]')
+            raise ValueError('feature accepted: [spatial, context1, context2]')
 
