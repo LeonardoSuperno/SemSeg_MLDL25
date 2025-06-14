@@ -186,3 +186,38 @@ def build_loaders(train_dataset_name: str,
         raise ValueError('Val datasets accepted: [CityScapes]')
     
     return train_loader, val_loader, data_height, data_width
+
+def build_test_loader(test_dataset_name: str,
+                     batch_size: int,
+                     n_workers: int) -> Tuple[DataLoader, int, int]:
+    """
+    Set up data loader for the test dataset in semantic segmentation.
+
+    Args:
+    - test_dataset_name (str): Name of the test dataset ('CityScapes').
+    - batch_size (int): Batch size for the data loader.
+    - n_workers (int): Number of workers for data loading.
+
+    Raises:
+    - ValueError: If an invalid test_dataset_name is provided.
+
+    Returns:
+    - Tuple containing:
+        - test_loader (DataLoader): DataLoader for the test dataset.
+        - data_height (int): Height of the dataset images.
+        - data_width (int): Width of the dataset images.
+    """
+    
+    transform_cityscapes = A.Compose([
+        A.Resize(CITYSCAPES['height'], CITYSCAPES['width']),
+    ])
+    
+    if test_dataset_name == 'CityScapes':
+        test_dataset = CityScapes(root_dir=CITYSCAPES_PATH, split='val', transform=transform_cityscapes)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers, pin_memory=True)
+        data_height = CITYSCAPES['height']
+        data_width = CITYSCAPES['width']
+    else:
+        raise ValueError('Test datasets accepted: [CityScapes]')
+    
+    return test_loader, data_height, data_width

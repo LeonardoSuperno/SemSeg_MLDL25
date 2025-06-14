@@ -1,3 +1,5 @@
+MODE = 'test'  # ['train', 'test']
+
 # Core
 EPOCHS = 50
 DEVICE = 'cuda'
@@ -22,6 +24,7 @@ IGNORE_INDEX = 255
 N_CLASSES = 19
 TRAIN_DATASET_NAME = 'GTA5'  # [CityScapes, GTA5]
 VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
+TEST_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = True
 AUGMENTED_TYPE = 'aug3'  # ['aug1', 'aug2', 'aug3', 'aug4']
 BATCH_SIZE = 6  # [2, 4, 8]

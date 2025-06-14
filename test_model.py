@@ -1,22 +1,85 @@
-from utils.visualization import plot_segmented_images
+from utils.metrics import *
+from builder import *
+from utils.checkpoints import *
+from utils.data_processing import label_to_rgb
+
 import torch
+import os
+from PIL import Image
+import time
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print('Using device:', device)
+def test_model(model_name, 
+            test_dataset_name, 
+            n_classes,
+            multi_level,
+            feature,
+            lr,
+            loss_fn_name,
+            ignore_index,
+            batch_size,
+            n_workers,
+            device,
+            parallelize,
+            project_step,
+            verbose,
+            output_root,
+            checkpoint_root,
+            adversarial):
+    
+    model, optimizer, loss_fn, model_D, optimizer_D, loss_D = build_model(model_name, 
+                                                                       n_classes,
+                                                                       device,
+                                                                       parallelize, 
+                                                                       lr,
+                                                                       loss_fn_name,
+                                                                       ignore_index,
+                                                                       adversarial,
+                                                                       multi_level,
+                                                                       feature)
+
+    # get loader
+    test_loader, data_height, data_width = build_test_loader(test_dataset_name, 
+                                                                    batch_size,
+                                                                    n_workers)
+    
+    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D, multi_level=multi_level)
+
+    if no_checkpoint:
+        print('No checkpoint found. Please train the model first.')
+        return
+    
+    total_miou = 0
+    total_iou = np.zeros(n_classes)
+    
+    images, labels = next(iter(test_loader))
+    _, outputs = model(images)
+    predictions = torch.argmax(torch.softmax(outputs, dim=1), dim=1)
+
+    hist = fast_hist(labels.cpu().numpy(), predictions.cpu().numpy(), n_classes)
+    running_iou = np.array(per_class_iou(hist)).flatten()
+    total_miou += running_iou.sum()
+    total_iou += running_iou
+    total_miou += running_iou.sum()
+    total_iou += running_iou
+
+    save_dir = os.path.join(output_root, "test", project_step)
+    os.makedirs(save_dir, exist_ok=True)
+
+    for idx, (image, label, output) in enumerate(zip(images, labels, predictions)):
+        image = image.cpu().numpy().transpose(1, 2, 0)
+        label = label.cpu().numpy()
+        output = output.cpu().numpy()
+
+        image = (np.transpose(image, (1, 2, 0)) * 255).astype(np.uint8)
+        image = Image.fromarray(image)
+        rgb_label = label_to_rgb(label)
+        rgb_output = label_to_rgb(output)
+
+        # Save the test image and label, output prediction
+        image.save(os.path.join(save_dir, f"image_{idx}.png"))
+        rgb_label.save(os.path.join(save_dir, f"label_{idx}.png"))
+        rgb_output.save(os.path.join(save_dir, f"prediction_{idx}.png"))
+        
 
 
-# deepLab on the same domain 
-# BiSeNet on the same domain
-# BiSeNet on different domain
-# BiSeNet domain adaptation
-
-model_roots = ['/kaggle/input/checkpoint/checkpoint/checkpoint.pth']
-
-model_types = [
-    #('DeepLabV2','DeepLabV2'),
-    #('BiSeNet', 'BiSeNet'),
-    #('BiSeNet', 'BiSeNet Domain Shift'),
-    ('BiSeNet', 'BiSeNet Domain Adaptation')
-]
-
-plot_segmented_images(model_roots=model_roots, model_types=model_types,n_images=5, device=device)
+    
