@@ -66,19 +66,18 @@ def test_model(model_name,
     os.makedirs(save_dir, exist_ok=True)
 
     for idx, (image, label, output) in enumerate(zip(images, labels, predictions)):
-        image = image.cpu().numpy().transpose(1, 2, 0)
+        image = (image.permute(1, 2, 0)*255).cpu().numpy().astype(np.uint8)
         label = label.cpu().numpy()
         output = output.cpu().numpy()
 
-        image = (np.transpose(image, (1, 2, 0)) * 255).astype(np.uint8)
-        image = Image.fromarray(image)
+        rgb_image = Image.fromarray(image)
         rgb_label = label_to_rgb(label)
         rgb_output = label_to_rgb(output)
 
         # Save the test image and label, output prediction
-        image.save(os.path.join(save_dir, f"image_{idx}.png"))
-        rgb_label.save(os.path.join(save_dir, f"label_{idx}.png"))
-        rgb_output.save(os.path.join(save_dir, f"prediction_{idx}.png"))
+        rgb_image.save(os.path.join(save_dir, f"{idx:02d}_image.png"))
+        rgb_label.save(os.path.join(save_dir, f"{idx:02d}_label.png"))
+        rgb_output.save(os.path.join(save_dir, f"{idx:02d}_prediction.png"))
         
 
 
