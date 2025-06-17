@@ -1,14 +1,15 @@
 MODE = 'test'  # ['train', 'test']
 
 # Core
-EPOCHS = 50
+EPOCHS = 5
 DEVICE = 'cuda'
 PARALLELIZE = True
 PROJECT_STEP = 'Step5'  # [Step2_1, Step2_2, Step3_1, Step3_2, Step4, Step5]
 VERBOSE = True
 EVAL_ITERATIONS = 100
 ADVERSARIAL = True
-MULTI_LEVEL = True
+EXTRA_LOSS_NAME = 'DiceLoss' # [FocalLoss, DiceLoss, None]
+MULTI_LEVEL = False
 FEATURE = 'spatial' # ['spatial', 'context1, 'context2']
 
 # Model
@@ -27,7 +28,7 @@ VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 TEST_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = True
 AUGMENTED_TYPE = 'aug3'  # ['aug1', 'aug2', 'aug3', 'aug4']
-BATCH_SIZE = 6  # [2, 4, 8]
+BATCH_SIZE = 4  # [2, 4, 8]
 N_WORKERS = 2 # [0, 2, 4]
 CITYSCAPES = {
     'width': 1024,

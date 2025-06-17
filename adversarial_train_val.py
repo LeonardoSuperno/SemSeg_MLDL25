@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from typing import Tuple, List, Union
+from utils.losses import FocalLoss
 from utils.metrics import *
+from config import EXTRA_LOSS_NAME
 from utils.optimization import *
 from utils.visualization import *
 from utils.checkpoints import *
@@ -24,6 +26,9 @@ def adversarial_train_val(model: torch.nn.Module,
           output_root: str,
           checkpoint_root: str,
           verbose: bool,
+          lambda_ce: float,
+          lambda_extra: float,
+          extra_loss_fn: torch.nn.Module,
           n_classes: int = 19,
           power: float = 0.9,
           adversarial: bool = True,
@@ -57,7 +62,8 @@ def adversarial_train_val(model: torch.nn.Module,
         model_D.train()
         
         source_loader, target_loader = dataloaders        
-        
+        print(f"Testing with lambda_ce={lambda_ce}, lambda_{EXTRA_LOSS_NAME}={lambda_extra}")
+
         for (source_data, source_label), (target_data, _) in zip(source_loader, cycle(target_loader)):
             
             iterations+=1
@@ -76,7 +82,7 @@ def adversarial_train_val(model: torch.nn.Module,
             
             source_output = interp_source(model(source_data))
 
-            segmentation_loss = ce_loss(source_output, source_label)
+            segmentation_loss = lambda_ce * ce_loss(source_output, source_label) + lambda_extra * extra_loss_fn(source_output, source_label)
             segmentation_loss.backward()
 
             #Train to segment train images like source images

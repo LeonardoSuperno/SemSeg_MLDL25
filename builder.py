@@ -2,6 +2,7 @@ from models.discriminator.discriminator import FCDiscriminator
 import numpy as np
 import torch
 import torch.nn as nn
+from utils.losses import FocalLoss, DiceLoss
 from torch.utils.data import DataLoader
 from typing import Tuple, Union
 import albumentations as A
@@ -24,7 +25,8 @@ def build_model(model_name: str,
              ignore_index: int,
              adversarial: bool,
              multy_level:bool,
-             feature:str) -> Tuple[torch.nn.Module, torch.optim.Optimizer, torch.nn.Module, torch.nn.Module, torch.optim.Optimizer, torch.nn.Module]:
+             extra_loss_name: str,
+             feature:str) -> Tuple[torch.nn.Module, torch.optim.Optimizer, torch.nn.Module, torch.nn.Module, torch.optim.Optimizer, torch.nn.Module, torch.nn.Module]:
     """
     Set up components for semantic segmentation model training.
 
@@ -92,6 +94,15 @@ def build_model(model_name: str,
     
     # Initialize adversarial components if adversarial is True
     if adversarial:
+        if extra_loss_name  == 'FocalLoss':
+            extra_loss_fn = FocalLoss(num_class=n_classes, ignore_label=ignore_index)
+        elif extra_loss_name  == 'DiceLoss':
+            extra_loss_fn = DiceLoss(num_classes=n_classes, ignore_index=ignore_index)
+        elif extra_loss_name == "None":
+            extra_loss_fn = None
+        else:
+            raise ValueError('Extra loss function accepted: [FocalLoss, DiceLoss, None]')
+
         if multy_level:
             model_D1 = FCDiscriminator(num_classes=n_classes).to(device)
             if parallelize and device == 'cuda' and torch.cuda.device_count() > 1:
@@ -112,7 +123,7 @@ def build_model(model_name: str,
             optimizer_D = torch.optim.Adam(model_D.parameters(), lr=1e-3, betas=(0.9, 0.99))
             loss_D = torch.nn.BCEWithLogitsLoss()
         
-    return model, optimizer, loss_fn, model_D, optimizer_D, loss_D
+    return model, optimizer, loss_fn, model_D, optimizer_D, loss_D, extra_loss_fn
 
 def build_loaders(train_dataset_name: str, 
                 val_dataset_name: str, 

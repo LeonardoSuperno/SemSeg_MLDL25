@@ -5,6 +5,7 @@ from config import *
 
 
 if __name__ == '__main__':
+    print(EXTRA_LOSS_NAME)
     if MODE == 'train':
         pipeline(
             model_name=MODEL_NAME, 

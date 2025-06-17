@@ -33,8 +33,8 @@ def pipeline (model_name: str,
               checkpoint_root:str,
               power:float,
               evalIterations:int,
-              adversarial:bool
-              )->None:
+              adversarial:bool,
+              extra_loss_name: str)->None:
     
     """
     Main pipeline function to orchestrate the training and evaluation of a deep learning model.
@@ -67,17 +67,6 @@ def pipeline (model_name: str,
     Returns:
         None
     """
-    model, optimizer, loss_fn, model_D, optimizer_D, loss_D = build_model(model_name, 
-                                                                       n_classes,
-                                                                       device,
-                                                                       parallelize, 
-                                                                       lr,
-                                                                       loss_fn_name,
-                                                                       ignore_index,
-                                                                       adversarial,
-                                                                       multi_level,
-                                                                       feature)
-
     # get loader
     train_loader, val_loader, data_height, data_width = build_loaders(train_dataset_name, 
                                                                     val_dataset_name, 
@@ -86,6 +75,19 @@ def pipeline (model_name: str,
                                                                     batch_size,
                                                                     n_workers,
                                                                     adversarial)
+    
+    model, optimizer, loss_fn, model_D, optimizer_D, loss_D, extra_loss_fn = build_model(model_name, 
+                                                                       n_classes,
+                                                                       device,
+                                                                       parallelize, 
+                                                                       lr,
+                                                                       loss_fn_name,
+                                                                       ignore_index,
+                                                                       adversarial,
+                                                                       multi_level,
+                                                                       extra_loss_name=extra_loss_name,
+                                                                       feature=feature)
+
     if adversarial:
         if multi_level:
             model_results = multi_adversarial_train_val(model=model, 
@@ -119,10 +121,13 @@ def pipeline (model_name: str,
                                             output_root=output_root,
                                             checkpoint_root=checkpoint_root,
                                             verbose=verbose,
+                                            lambda_ce=1.0,
+                                            lambda_extra=2.0,
+                                            extra_loss_fn=extra_loss_fn,
                                             n_classes=n_classes,
                                             power=power,
                                             adversarial=adversarial)
-            
+                
         
     else:
         model_results = train_val(model=model,
