@@ -115,7 +115,7 @@ def multi_adversarial_train_val(model: torch.nn.Module,
             adversarial_loss2 = bce_loss(discriminator_output_target2, discriminator_label_source) 
 
             discriminator_loss = lambda_adv1 * adversarial_loss1 + lambda_adv2 * adversarial_loss2
-            # loss = loss / args.iter_size NORMALIZATION ???
+        
             discriminator_loss.backward() # Only for the Generator
             
             
