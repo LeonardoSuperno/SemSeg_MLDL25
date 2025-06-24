@@ -1,9 +1,7 @@
-# TODO: Define here your training and validation loops.
 import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
-#from models import BiSeNet, get_deeplab_v2
 from typing import Tuple, List, Union
 from utils.metrics import *
 from utils.optimization import *

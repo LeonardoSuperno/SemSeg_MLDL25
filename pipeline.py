@@ -1,5 +1,4 @@
 from typing import Tuple, List, Union
-#from models import BiSeNet, get_deeplab_v2
 from config import *
 from builder import *
 from train_val import train_val
@@ -10,183 +9,95 @@ from utils.optimization import *
 from utils.visualization import *
 from utils.checkpoints import *
 
-
-def pipeline (model_name: str, 
-              train_dataset_name: str, 
-              val_dataset_name: str,
-              n_classes:int,
-              epochs: int,
-              augmented: bool,
-              augmentedType:str,
-              multi_level:bool,
-              feature:str,
-              lr:float,
-              loss_fn_name: str,
-              ignore_index:int,
-              batch_size: int,
-              n_workers: int,
-              device:str,
-              parallelize:bool,
-              project_step:str,
-              verbose: bool,
-              output_root:str,
-              checkpoint_root:str,
-              power:float,
-              evalIterations:int,
-              adversarial:bool,
-              extra_loss_name: str)->None:
+def pipeline(model_name: str, 
+             train_dataset_name: str, 
+             val_dataset_name: str,
+             n_classes: int,
+             epochs: int,
+             augmented: bool,
+             augmentedType: str,
+             multi_level: bool,
+             feature: str,
+             lr: float,
+             loss_fn_name: str,
+             ignore_index: int,
+             batch_size: int,
+             n_workers: int,
+             device: str,
+             parallelize: bool,
+             project_step: str,
+             verbose: bool,
+             output_root: str,
+             checkpoint_root: str,
+             power: float,
+             evalIterations: int,
+             adversarial: bool,
+             extra_loss_name: str) -> None:
     
-    """
-    Main pipeline function to orchestrate the training and evaluation of a deep learning model.
-
-    Args:
-        model_name (str): Name of the deep learning model architecture.
-        train_dataset_name (str): Name of the training dataset.
-        val_dataset_name (str): Name of the validation dataset.
-        n_classes (int): Number of classes in the dataset.
-        epochs (int): Number of epochs for training.
-        augmented (bool): Whether to use data augmentation during training.
-        augmentedType (str): Type of data augmentation to apply.
-        optimizer_name (str): Name of the optimizer to use.
-        lr (float): Learning rate for the optimizer.
-        momentum (float): Momentum factor for optimizers like SGD.
-        weight_decay (float): Weight decay (L2 penalty) for the optimizer.
-        loss_fn_name (str): Name of the loss function.
-        ignore_index (int): Index to ignore in the loss function (e.g., for padding).
-        batch_size (int): Batch size for training and validation data loaders.
-        n_workers (int): Number of workers for data loading.
-        device (str): Device to run the model on ('cuda' or 'cpu').
-        parallelize (bool): Whether to use GPU parallelization.
-        project_step (str): Name or identifier of the current project step or experiment.
-        verbose (bool): Whether to print detailed logs during training.
-        checkpoint_root (str): Root directory to save checkpoints and results.
-        power (float): Power parameter for polynomial learning rate scheduler.
-        evalIterations (int): Number of iterations for evaluating model latency and FPS.
-        adversarial (bool): Whether to use adversarial training.
-
-    Returns:
-        None
-    """
-    # get loader
-    train_loader, val_loader, data_height, data_width = build_loaders(train_dataset_name, 
-                                                                    val_dataset_name, 
-                                                                    augmented,
-                                                                    augmentedType,
-                                                                    batch_size,
-                                                                    n_workers,
-                                                                    adversarial)
+    # Build data loaders and retrieve input image dimensions
+    train_loader, val_loader, data_height, data_width = build_loaders(
+        train_dataset_name, val_dataset_name, augmented, augmentedType,
+        batch_size, n_workers, adversarial
+    )
     
-    model, optimizer, loss_fn, model_D, optimizer_D, loss_D, extra_loss_fn = build_model(model_name, 
-                                                                       n_classes,
-                                                                       device,
-                                                                       parallelize, 
-                                                                       lr,
-                                                                       loss_fn_name,
-                                                                       ignore_index,
-                                                                       adversarial,
-                                                                       multi_level,
-                                                                       extra_loss_name=extra_loss_name,
-                                                                       feature=feature)
+    # Build model(s), optimizer(s), and loss function(s)
+    model, optimizer, loss_fn, model_D, optimizer_D, loss_D, extra_loss_fn = build_model(
+        model_name, n_classes, device, parallelize, lr, loss_fn_name,
+        ignore_index, adversarial, multi_level, extra_loss_name=extra_loss_name, feature=feature
+    )
 
+    # Choose training loop based on adversarial and multi-level flags
     if adversarial:
         if multi_level:
-            model_results = multi_adversarial_train_val(model=model, 
-                                            model_D = model_D,
-                                            optimizer=optimizer, 
-                                            optimizer_D = optimizer_D, 
-                                            ce_loss=loss_fn, 
-                                            bce_loss=loss_D, 
-                                            dataloaders=train_loader, 
-                                            val_loader=val_loader, 
-                                            epochs=epochs, 
-                                            device=device, 
-                                            output_root=output_root,
-                                            checkpoint_root=checkpoint_root,
-                                            verbose=verbose,
-                                            n_classes=n_classes,
-                                            power=power,
-                                            adversarial=adversarial,
-                                            multi_level=multi_level)
+            # Multi-level adversarial training
+            model_results = multi_adversarial_train_val(
+                model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D,
+                ce_loss=loss_fn, bce_loss=loss_D, dataloaders=train_loader, val_loader=val_loader,
+                epochs=epochs, device=device, output_root=output_root, checkpoint_root=checkpoint_root,
+                verbose=verbose, n_classes=n_classes, power=power,
+                adversarial=adversarial, multi_level=multi_level
+            )
         else:
-            model_results = adversarial_train_val(model=model, 
-                                            model_D = model_D,
-                                            optimizer=optimizer, 
-                                            optimizer_D = optimizer_D, 
-                                            ce_loss=loss_fn, 
-                                            bce_loss=loss_D, 
-                                            dataloaders=train_loader, 
-                                            val_loader=val_loader, 
-                                            epochs=epochs, 
-                                            device=device, 
-                                            output_root=output_root,
-                                            checkpoint_root=checkpoint_root,
-                                            verbose=verbose,
-                                            lambda_ce=1.0,
-                                            lambda_extra=2.0,
-                                            extra_loss_fn=extra_loss_fn,
-                                            n_classes=n_classes,
-                                            power=power,
-                                            adversarial=adversarial)
-                
-        
+            # Single-level adversarial training with extra loss
+            model_results = adversarial_train_val(
+                model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D,
+                ce_loss=loss_fn, bce_loss=loss_D, dataloaders=train_loader, val_loader=val_loader,
+                epochs=epochs, device=device, output_root=output_root, checkpoint_root=checkpoint_root,
+                verbose=verbose, lambda_ce=1.0, lambda_extra=2.0,
+                extra_loss_fn=extra_loss_fn, n_classes=n_classes, power=power,
+                adversarial=adversarial
+            )
     else:
-        model_results = train_val(model=model,
-                            optimizer=optimizer, 
-                            loss_fn = loss_fn, 
-                            train_loader=train_loader, 
-                            val_loader=val_loader, 
-                            epochs=epochs, 
-                            device=device, 
-                            output_root=output_root,
-                            checkpoint_root=checkpoint_root,
-                            verbose=verbose,
-                            n_classes=n_classes,
-                            power=power)
+        # Standard training (no adversarial setup)
+        model_results = train_val(
+            model=model, optimizer=optimizer, loss_fn=loss_fn,
+            train_loader=train_loader, val_loader=val_loader,
+            epochs=epochs, device=device, output_root=output_root,
+            checkpoint_root=checkpoint_root, verbose=verbose,
+            n_classes=n_classes, power=power
+        )
 
-    # # Evaluation on validation set
-    # eval_metrics = evaluate_model(model=model,
-    #                               dataloader=val_loader,
-    #                               device=device,
-    #                               n_classes=n_classes,
-    #                               ignore_index=ignore_index)
+    # Compute FLOPs and parameter count
+    model_params_flops = compute_flops(
+        model=model, height=data_height, width=data_width
+    )
     
-    # if verbose:
-    #     print("\nEvaluation Results:")
-    #     for k, v in eval_metrics.items():
-    #         print(f"{k}: {v}")
-
-    model_params_flops = compute_flops(model=model, 
-                                       height=data_height, 
-                                       width=data_width)
+    # Measure model latency and FPS
+    model_latency_fps = compute_latency_and_fps(
+        model=model, height=data_height, width=data_width,
+        iterations=evalIterations, device=device
+    )
     
-    model_latency_fps = compute_latency_and_fps(model=model,
-                                                height=data_height, 
-                                                width=data_width, 
-                                                iterations=evalIterations, 
-                                                device=device)
+    # Generate and save loss, mIoU, and per-class IoU plots
+    plot_loss(model_results, model_name, project_step, train_dataset_name, val_dataset_name)
+    plot_miou(model_results, model_name, project_step, train_dataset_name, val_dataset_name)
+    plot_iou(model_results, model_name, project_step, train_dataset_name, val_dataset_name)
     
-    # visualization 
-    plot_loss(model_results, 
-              model_name, 
-              project_step, 
-              train_dataset_name, 
-              val_dataset_name)
-    
-    plot_miou(model_results, 
-              model_name, 
-              project_step, 
-              train_dataset_name, 
-              val_dataset_name)
-    
-    plot_iou(model_results, 
-             model_name, 
-             project_step, 
-             train_dataset_name, 
-             val_dataset_name)
-    
-    # save results
-    save_results(model_results, 
-                 filename=f"{model_name}_metrics_{project_step}", 
-                 project_step=project_step,
-                 model_params_flops=model_params_flops,
-                 model_latency_fps=model_latency_fps)
+    # Save all final metrics and performance results
+    save_results(
+        model_results,
+        filename=f"{model_name}_metrics_{project_step}",
+        project_step=project_step,
+        model_params_flops=model_params_flops,
+        model_latency_fps=model_latency_fps
+    )

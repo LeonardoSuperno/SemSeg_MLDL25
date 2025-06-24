@@ -94,7 +94,6 @@ def multi_adversarial_train_val(model: torch.nn.Module,
 
             segmentation_loss = segmentation_loss2 + lambda_seg * segmentation_loss1
 
-            # loss = loss / args.iter_size NORMALIZZAZIONE???
             segmentation_loss.backward()
 
 

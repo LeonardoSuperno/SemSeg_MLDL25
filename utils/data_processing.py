@@ -1,9 +1,9 @@
 import numpy as np
 from PIL import Image
 import PIL
-from config import GTA, CITYSCAPES
+from config import GTA
 import albumentations as A
-import cv2
+
 
 def get_color_to_id() -> dict:
     """
@@ -99,6 +99,7 @@ def label_to_rgb(label:np.ndarray)->PIL.Image:
     
     return Image.fromarray(color_image, 'RGB')
 
+
 def get_augmented_data(augmentedType: str) -> A.Compose:
     
     augmentations = {
@@ -132,4 +133,3 @@ def get_augmented_data(augmentedType: str) -> A.Compose:
         return augmentations[augmentedType]
     else:
         print('Transformation accepted: [aug1, aug2, aug3, aug4]')
-        

@@ -85,7 +85,7 @@ def adversarial_train_val(model: torch.nn.Module,
             segmentation_loss = lambda_ce * ce_loss(source_output, source_label) + lambda_extra * extra_loss_fn(source_output, source_label)
             segmentation_loss.backward()
 
-            #Train to segment train images like source images
+            #Train to Segment train images like source images
             output_target = interp_target(model(target_data))
             
             prediction_target = torch.nn.functional.softmax(output_target)

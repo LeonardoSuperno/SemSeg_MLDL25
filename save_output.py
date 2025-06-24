@@ -2,13 +2,14 @@ from utils.metrics import *
 from builder import *
 from utils.checkpoints import *
 from utils.data_processing import label_to_rgb
-
 import torch
 import os
 from PIL import Image
 import time
 
-def test_model(model_name, 
+# This function given the final checkpoint generate the test image, label and the output prediction of the trained model
+
+def save_output(model_name, 
             test_dataset_name, 
             n_classes,
             multi_level,

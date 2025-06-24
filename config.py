@@ -1,4 +1,4 @@
-MODE = 'test'  # ['train', 'test']
+MODE = 'output'  # ['train', 'output']
 
 # Core
 EPOCHS = 5
@@ -28,7 +28,7 @@ VAL_DATASET_NAME = 'CityScapes'  # [CityScapes]
 TEST_DATASET_NAME = 'CityScapes'  # [CityScapes]
 AUGMENTED = True
 AUGMENTED_TYPE = 'aug3'  # ['aug1', 'aug2', 'aug3', 'aug4']
-BATCH_SIZE = 4  # [2, 4, 8]
+BATCH_SIZE = 4  # [2, 4, 6]
 N_WORKERS = 2 # [0, 2, 4]
 CITYSCAPES = {
     'width': 1024,

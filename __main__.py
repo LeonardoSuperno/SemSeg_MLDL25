@@ -1,5 +1,5 @@
 from pipeline import pipeline
-from test_model import test_model
+from save_output import save_output
 from config import *
 
 
@@ -32,8 +32,8 @@ if __name__ == '__main__':
             evalIterations=EVAL_ITERATIONS,
             adversarial=ADVERSARIAL
         ) 
-    elif MODE == 'test':
-        test_model(
+    elif MODE == 'output':
+        save_output(
             model_name=MODEL_NAME, 
             test_dataset_name=TEST_DATASET_NAME, 
             n_classes=N_CLASSES,
