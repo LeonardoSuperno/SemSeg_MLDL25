@@ -82,7 +82,11 @@ def adversarial_train_val(model: torch.nn.Module,
             
             source_output = interp_source(model(source_data))
 
-            segmentation_loss = lambda_ce * ce_loss(source_output, source_label) + lambda_extra * extra_loss_fn(source_output, source_label)
+            if(extra_loss_fn is not None):
+                segmentation_loss = lambda_ce * ce_loss(source_output, source_label) + lambda_extra * extra_loss_fn(source_output, source_label)
+            else:
+                segmentation_loss = lambda_ce * ce_loss(source_output, source_label)
+                
             segmentation_loss.backward()
 
             #Train to Segment train images like source images

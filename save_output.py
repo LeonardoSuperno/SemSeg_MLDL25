@@ -27,7 +27,7 @@ def save_output(model_name,
             checkpoint_root,
             adversarial):
     
-    model, optimizer, loss_fn, model_D, optimizer_D, loss_D = build_model(model_name, 
+    model, optimizer, _, model_D, optimizer_D, _ = build_model(model_name, 
                                                                        n_classes,
                                                                        device,
                                                                        parallelize, 
@@ -39,11 +39,11 @@ def save_output(model_name,
                                                                        feature)
 
     # get loader
-    test_loader, data_height, data_width = build_test_loader(test_dataset_name, 
+    test_loader, _, _ = build_test_loader(test_dataset_name, 
                                                                     batch_size,
                                                                     n_workers)
     
-    no_checkpoint, start_epoch, train_loss_list, train_miou_list, train_iou, val_loss_list, val_miou_list, val_iou = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D, multi_level=multi_level)
+    no_checkpoint, _, _, _, _, _, _, _ = load_checkpoint(checkpoint_root=checkpoint_root, adversarial=adversarial, model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D, multi_level=multi_level)
 
     if no_checkpoint:
         print('No checkpoint found. Please train the model first.')

@@ -32,6 +32,8 @@ def pipeline(model_name: str,
              power: float,
              evalIterations: int,
              adversarial: bool,
+             lambda_ce: float,
+             lambda_extra : float,
              extra_loss_name: str) -> None:
     
     # Build data loaders and retrieve input image dimensions
@@ -63,7 +65,7 @@ def pipeline(model_name: str,
                 model=model, model_D=model_D, optimizer=optimizer, optimizer_D=optimizer_D,
                 ce_loss=loss_fn, bce_loss=loss_D, dataloaders=train_loader, val_loader=val_loader,
                 epochs=epochs, device=device, output_root=output_root, checkpoint_root=checkpoint_root,
-                verbose=verbose, lambda_ce=1.0, lambda_extra=2.0,
+                verbose=verbose, lambda_ce=lambda_ce, lambda_extra=lambda_extra,
                 extra_loss_fn=extra_loss_fn, n_classes=n_classes, power=power,
                 adversarial=adversarial
             )

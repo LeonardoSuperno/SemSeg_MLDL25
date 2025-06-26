@@ -5,7 +5,6 @@ from config import *
 
 
 if __name__ == '__main__':
-    print(EXTRA_LOSS_NAME)
     if MODE == 'train':
         pipeline(
             model_name=MODEL_NAME, 
@@ -30,7 +29,10 @@ if __name__ == '__main__':
             checkpoint_root=CHECKPOINT_ROOT,
             power=POWER,
             evalIterations=EVAL_ITERATIONS,
-            adversarial=ADVERSARIAL
+            adversarial=ADVERSARIAL,
+            lambda_ce=LAMBDA_CE,
+            lambda_extra=LAMBDA_EXTRA,
+            extra_loss_name=EXTRA_LOSS_NAME
         ) 
     elif MODE == 'output':
         save_output(
